@@ -41,7 +41,8 @@ class _ScrollControllerHook extends Hook<ScrollController> {
   final ScrollControllerCallback? onDetach;
 
   @override
-  HookState<ScrollController, Hook<ScrollController>> createState() =>
+  HookState<ScrollController, Hook<ScrollController>> createState(
+          keys, beforeState) =>
       _ScrollControllerHookState();
 }
 

@@ -21,7 +21,7 @@ class ObjectRef<T> {
 /// This is useful for sharing state across `build` calls, without causing
 /// unnecessary rebuilds.
 ObjectRef<T> useRef<T>(T initialValue) {
-  return useMemoized(() => ObjectRef<T>(initialValue));
+  return useMemoized((e) => ObjectRef<T>(initialValue));
 }
 
 /// Cache a function across rebuilds based on a list of keys.
@@ -45,7 +45,7 @@ T useCallback<T extends Function>(
   T callback, [
   List<Object?> keys = const <Object>[],
 ]) {
-  return useMemoized(() => callback, keys);
+  return useMemoized((e) => callback, keys);
 }
 
 /// Caches the instance of a complex object.
@@ -55,7 +55,7 @@ T useCallback<T extends Function>(
 ///
 /// A subsequent call of [useMemoized] with different [keys] will re-invoke the function to create a new instance.
 T useMemoized<T>(
-  T Function() valueBuilder, [
+  T Function(MemoizedEvent<T> e) valueBuilder, [
   List<Object?> keys = const <Object>[],
 ]) {
   return use(
@@ -72,14 +72,44 @@ class _MemoizedHook<T> extends Hook<T> {
     required List<Object?> keys,
   }) : super(keys: keys);
 
-  final T Function() valueBuilder;
+  final T Function(MemoizedEvent<T> e) valueBuilder;
 
   @override
-  _MemoizedHookState<T> createState() => _MemoizedHookState<T>();
+  _MemoizedHookState<T> createState(
+    keys,
+    beforeState,
+  ) {
+    final bs = beforeState as _MemoizedHookState<T>?;
+    return _MemoizedHookState<T>(
+      keys,
+      bs == null,
+      bs?.trigger,
+      bs?.value,
+    );
+  }
 }
 
-class _MemoizedHookState<T> extends HookState<T, _MemoizedHook<T>> {
-  late final T value = hook.valueBuilder();
+// memo event
+mixin MemoizedEvent<T> {
+  List<Object?>? trigger;
+  //上一次的值
+  late T? beforeValue;
+  //上一次的触发
+  List<Object?>? beforeTrigger;
+  //是否是第一次执行
+  late bool isInit;
+}
+
+class _MemoizedHookState<T> extends HookState<T, _MemoizedHook<T>>
+    with MemoizedEvent<T> {
+  _MemoizedHookState(
+      this.trigger, this.isInit, this.beforeTrigger, this.beforeValue);
+  late final T value = hook.valueBuilder(this);
+
+  final List<Object?>? trigger;
+  final bool isInit;
+  final List<Object?>? beforeTrigger;
+  final T? beforeValue;
 
   @override
   T build(BuildContext context) {
@@ -123,7 +153,11 @@ class _ValueChangedHook<T, R> extends Hook<R?> {
   final T value;
 
   @override
-  _ValueChangedHookState<T, R> createState() => _ValueChangedHookState<T, R>();
+  _ValueChangedHookState<T, R> createState(
+    keys,
+    beforeState,
+  ) =>
+      _ValueChangedHookState<T, R>();
 }
 
 class _ValueChangedHookState<T, R>
@@ -197,7 +231,11 @@ class _EffectHook extends Hook<void> {
   final Dispose? Function() effect;
 
   @override
-  _EffectHookState createState() => _EffectHookState();
+  _EffectHookState createState(
+    keys,
+    beforeState,
+  ) =>
+      _EffectHookState();
 }
 
 class _EffectHookState extends HookState<void, _EffectHook> {
@@ -274,7 +312,11 @@ class _StateHook<T> extends Hook<ValueNotifier<T>> {
   final T initialData;
 
   @override
-  _StateHookState<T> createState() => _StateHookState();
+  _StateHookState<T> createState(
+    keys,
+    beforeState,
+  ) =>
+      _StateHookState();
 }
 
 class _StateHookState<T> extends HookState<ValueNotifier<T>, _StateHook<T>> {

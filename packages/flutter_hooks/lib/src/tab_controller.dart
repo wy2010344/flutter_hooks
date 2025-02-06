@@ -35,7 +35,8 @@ class _TabControllerHook extends Hook<TabController> {
   final int initialIndex;
 
   @override
-  HookState<TabController, Hook<TabController>> createState() =>
+  HookState<TabController, Hook<TabController>> createState(
+          keys, beforeState) =>
       _TabControllerHookState();
 }
 

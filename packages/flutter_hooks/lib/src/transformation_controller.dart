@@ -26,7 +26,7 @@ class _TransformationControllerHook extends Hook<TransformationController> {
 
   @override
   HookState<TransformationController, Hook<TransformationController>>
-      createState() => _TransformationControllerHookState();
+      createState(keys, beforeState) => _TransformationControllerHookState();
 }
 
 class _TransformationControllerHookState

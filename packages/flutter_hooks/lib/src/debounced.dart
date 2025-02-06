@@ -40,7 +40,8 @@ class _DebouncedHook<T> extends Hook<T?> {
   final Duration timeout;
 
   @override
-  _DebouncedHookState<T> createState() => _DebouncedHookState();
+  _DebouncedHookState<T> createState(keys, beforeState) =>
+      _DebouncedHookState();
 }
 
 class _DebouncedHookState<T> extends HookState<T?, _DebouncedHook<T>> {

@@ -20,7 +20,10 @@ class _AutomaticKeepAliveHook extends Hook<void> {
   final bool wantKeepAlive;
 
   @override
-  HookState<void, _AutomaticKeepAliveHook> createState() =>
+  HookState<void, _AutomaticKeepAliveHook> createState(
+    keys,
+    beforeState,
+  ) =>
       _AutomaticKeepAliveHookState();
 }
 

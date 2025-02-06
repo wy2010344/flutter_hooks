@@ -26,7 +26,8 @@ class _AppLifecycleHook extends Hook<AppLifecycleState?> {
   final LifecycleCallback? onStateChanged;
 
   @override
-  __AppLifecycleStateState createState() => __AppLifecycleStateState();
+  __AppLifecycleStateState createState(keys, beforeState) =>
+      __AppLifecycleStateState();
 }
 
 class __AppLifecycleStateState

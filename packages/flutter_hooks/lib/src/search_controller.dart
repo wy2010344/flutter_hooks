@@ -12,7 +12,8 @@ class _SearchControllerHook extends Hook<SearchController> {
   const _SearchControllerHook({List<Object?>? keys}) : super(keys: keys);
 
   @override
-  HookState<SearchController, Hook<SearchController>> createState() =>
+  HookState<SearchController, Hook<SearchController>> createState(
+          keys, beforeState) =>
       _SearchControllerHookState();
 }
 

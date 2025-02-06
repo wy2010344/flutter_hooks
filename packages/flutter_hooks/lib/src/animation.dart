@@ -14,7 +14,7 @@ class _UseAnimationHook<T> extends _ListenableHook {
   const _UseAnimationHook(Animation<T> animation) : super(animation);
 
   @override
-  _UseAnimationStateHook createState() {
+  _UseAnimationStateHook createState(keys, beforeState) {
     return _UseAnimationStateHook();
   }
 }
@@ -91,7 +91,7 @@ class _AnimationControllerHook extends Hook<AnimationController> {
   final AnimationBehavior animationBehavior;
 
   @override
-  _AnimationControllerHookState createState() =>
+  _AnimationControllerHookState createState(keys, beforeState) =>
       _AnimationControllerHookState();
 
   @override
@@ -164,7 +164,8 @@ class _SingleTickerProviderHook extends Hook<TickerProvider> {
   const _SingleTickerProviderHook([List<Object?>? keys]) : super(keys: keys);
 
   @override
-  _TickerProviderHookState createState() => _TickerProviderHookState();
+  _TickerProviderHookState createState(keys, beforeState) =>
+      _TickerProviderHookState();
 }
 
 class _TickerProviderHookState

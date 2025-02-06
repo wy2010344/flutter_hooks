@@ -16,7 +16,8 @@ class _DraggableScrollableControllerHook
 
   @override
   HookState<DraggableScrollableController, Hook<DraggableScrollableController>>
-      createState() => _DraggableScrollableControllerHookState();
+      createState(keys, beforeState) =>
+          _DraggableScrollableControllerHookState();
 }
 
 class _DraggableScrollableControllerHookState extends HookState<

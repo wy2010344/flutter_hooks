@@ -72,7 +72,7 @@ R use<R>(Hook<R> hook) => Hook.use(hook);
 /// ```
 /// class Usual extends StatefulWidget {
 ///   @override
-///   _UsualState createState() => _UsualState();
+///   _UsualState createState(keys,beforeState) => _UsualState();
 /// }
 ///
 /// class _UsualState extends State<Usual>
@@ -207,13 +207,14 @@ Calling them outside of build method leads to an unstable state and is therefore
   ///
   /// ```
   /// @override
-  /// HookState createState() => _MyHookState();
+  /// HookState createState(keys,beforeState) => _MyHookState();
   /// ```
   ///
   /// The framework can call this method multiple times over the lifetime of a [HookWidget]. For example,
   /// if the hook is used multiple times, a separate [HookState] must be created for each usage.
   @protected
-  HookState<R, Hook<R>> createState();
+  HookState<R, Hook<R>> createState(
+      List<Object?>? keys, HookState<R, Hook<R>>? beforeState);
 }
 
 /// The logic and internal state for a [HookWidget]
@@ -329,13 +330,14 @@ class _Entry<T> extends LinkedListEntry<_Entry<T>> {
 }
 
 extension on HookElement {
-  HookState<R, Hook<R>> _createHookState<R>(Hook<R> hook) {
+  HookState<R, Hook<R>> _createHookState<R>(
+      Hook<R> hook, HookState<R, Hook<R>>? beforeState) {
     assert(() {
       _debugIsInitHook = true;
       return true;
     }(), '');
 
-    final state = hook.createState()
+    final state = hook.createState(hook.keys, beforeState)
       .._element = this
       .._hook = hook
       ..initHook();
@@ -349,7 +351,7 @@ extension on HookElement {
   }
 
   void _appendHook<R>(Hook<R> hook) {
-    final result = _createHookState<R>(hook);
+    final result = _createHookState<R>(hook, null);
     _currentHookState = _Entry(result);
     _hooks.add(_currentHookState!);
   }
@@ -479,7 +481,8 @@ Type mismatch between hooks:
       } else {
         _needDispose ??= LinkedList();
         _needDispose!.add(_Entry(_currentHookState!.value));
-        _currentHookState!.value = _createHookState<R>(hook);
+        _currentHookState!.value = _createHookState<R>(
+            hook, _currentHookState?.value as HookState<R, Hook<R>>?);
       }
     }
 

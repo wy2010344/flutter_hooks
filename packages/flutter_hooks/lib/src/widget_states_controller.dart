@@ -25,8 +25,9 @@ class _WidgetStatesControllerHook extends Hook<WidgetStatesController> {
   final Set<WidgetState>? values;
 
   @override
-  HookState<WidgetStatesController, Hook<WidgetStatesController>>
-      createState() => _WidgetStateControllerHookState();
+  HookState<WidgetStatesController, Hook<WidgetStatesController>> createState(
+          keys, beforeState) =>
+      _WidgetStateControllerHookState();
 }
 
 class _WidgetStateControllerHookState

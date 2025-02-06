@@ -72,7 +72,7 @@ class _TextEditingControllerHook extends Hook<TextEditingController> {
   final TextEditingValue? initialValue;
 
   @override
-  _TextEditingControllerHookState createState() {
+  _TextEditingControllerHookState createState(keys, beforeState) {
     return _TextEditingControllerHookState();
   }
 }

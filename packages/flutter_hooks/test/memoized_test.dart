@@ -4,9 +4,11 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 
 import 'mock.dart';
 
+class _M<T> with MemoizedEvent<T> {}
+
 void main() {
   final valueBuilder = MockValueBuilder();
-
+  final defaultEvent = _M<int>();
   tearDown(() {
     reset(valueBuilder);
   });
@@ -69,7 +71,7 @@ void main() {
       (tester) async {
     late int result;
 
-    when(valueBuilder()).thenReturn(42);
+    when(valueBuilder(defaultEvent)).thenReturn(42);
 
     await tester.pumpWidget(
       HookBuilder(builder: (context) {
@@ -78,7 +80,7 @@ void main() {
       }),
     );
 
-    verify(valueBuilder()).called(1);
+    verify(valueBuilder(defaultEvent)).called(1);
     verifyNoMoreInteractions(valueBuilder);
     expect(result, 42);
 
@@ -102,7 +104,7 @@ void main() {
       (tester) async {
     late int result;
 
-    when(valueBuilder()).thenReturn(0);
+    when(valueBuilder(defaultEvent)).thenReturn(0);
 
     await tester.pumpWidget(
       HookBuilder(builder: (context) {
@@ -111,7 +113,7 @@ void main() {
       }),
     );
 
-    verify(valueBuilder()).called(1);
+    verify(valueBuilder(defaultEvent)).called(1);
     verifyNoMoreInteractions(valueBuilder);
     expect(result, 0);
 
@@ -129,7 +131,7 @@ void main() {
 
     /* Add parameter */
 
-    when(valueBuilder()).thenReturn(1);
+    when(valueBuilder(defaultEvent)).thenReturn(1);
 
     await tester.pumpWidget(
       HookBuilder(builder: (context) {
@@ -139,7 +141,7 @@ void main() {
     );
 
     expect(result, 1);
-    verify(valueBuilder()).called(1);
+    verify(valueBuilder(defaultEvent)).called(1);
     verifyNoMoreInteractions(valueBuilder);
 
     /* No change */
@@ -156,7 +158,7 @@ void main() {
 
     /* Remove parameter */
 
-    when(valueBuilder()).thenReturn(2);
+    when(valueBuilder(defaultEvent)).thenReturn(2);
 
     await tester.pumpWidget(
       HookBuilder(builder: (context) {
@@ -166,7 +168,7 @@ void main() {
     );
 
     expect(result, 2);
-    verify(valueBuilder()).called(1);
+    verify(valueBuilder(defaultEvent)).called(1);
     verifyNoMoreInteractions(valueBuilder);
 
     /* No change */
@@ -191,7 +193,7 @@ void main() {
   testWidgets('memoized parameters compared in order', (tester) async {
     late int result;
 
-    when(valueBuilder()).thenReturn(0);
+    when(valueBuilder(defaultEvent)).thenReturn(0);
 
     await tester.pumpWidget(
       HookBuilder(builder: (context) {
@@ -200,7 +202,7 @@ void main() {
       }),
     );
 
-    verify(valueBuilder()).called(1);
+    verify(valueBuilder(defaultEvent)).called(1);
     verifyNoMoreInteractions(valueBuilder);
     expect(result, 0);
 
@@ -218,7 +220,7 @@ void main() {
 
     /* reader */
 
-    when(valueBuilder()).thenReturn(1);
+    when(valueBuilder(defaultEvent)).thenReturn(1);
 
     await tester.pumpWidget(
       HookBuilder(builder: (context) {
@@ -227,11 +229,11 @@ void main() {
       }),
     );
 
-    verify(valueBuilder()).called(1);
+    verify(valueBuilder(defaultEvent)).called(1);
     verifyNoMoreInteractions(valueBuilder);
     expect(result, 1);
 
-    when(valueBuilder()).thenReturn(2);
+    when(valueBuilder(defaultEvent)).thenReturn(2);
 
     await tester.pumpWidget(
       HookBuilder(builder: (context) {
@@ -240,13 +242,13 @@ void main() {
       }),
     );
 
-    verify(valueBuilder()).called(1);
+    verify(valueBuilder(defaultEvent)).called(1);
     verifyNoMoreInteractions(valueBuilder);
     expect(result, 2);
 
     /* value change */
 
-    when(valueBuilder()).thenReturn(3);
+    when(valueBuilder(defaultEvent)).thenReturn(3);
 
     await tester.pumpWidget(
       HookBuilder(builder: (context) {
@@ -255,7 +257,7 @@ void main() {
       }),
     );
 
-    verify(valueBuilder()).called(1);
+    verify(valueBuilder(defaultEvent)).called(1);
     verifyNoMoreInteractions(valueBuilder);
     expect(result, 3);
 
@@ -285,7 +287,7 @@ void main() {
     late int result;
     final parameters = <Object>[];
 
-    when(valueBuilder()).thenReturn(0);
+    when(valueBuilder(defaultEvent)).thenReturn(0);
 
     await tester.pumpWidget(
       HookBuilder(builder: (context) {
@@ -294,7 +296,7 @@ void main() {
       }),
     );
 
-    verify(valueBuilder()).called(1);
+    verify(valueBuilder(defaultEvent)).called(1);
     verifyNoMoreInteractions(valueBuilder);
     expect(result, 0);
 
@@ -320,8 +322,8 @@ void main() {
   testWidgets('debugFillProperties', (tester) async {
     await tester.pumpWidget(
       HookBuilder(builder: (context) {
-        useMemoized<Future<int>>(() => Future.value(10));
-        useMemoized<int>(() => 43);
+        useMemoized<Future<int>>((e) => Future.value(10));
+        useMemoized<int>((e) => 43);
         return const SizedBox();
       }),
     );
@@ -343,7 +345,7 @@ void main() {
 }
 
 class MockValueBuilder extends Mock {
-  int call() => super.noSuchMethod(
+  int call(MemoizedEvent<int> e) => super.noSuchMethod(
         Invocation.getter(#call),
         returnValue: 42,
       ) as int;

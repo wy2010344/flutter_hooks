@@ -48,7 +48,7 @@ class _FutureHook<T> extends Hook<AsyncSnapshot<T>> {
   final T? initialData;
 
   @override
-  _FutureStateHook<T> createState() => _FutureStateHook<T>();
+  _FutureStateHook<T> createState(keys, beforeState) => _FutureStateHook<T>();
 }
 
 class _FutureStateHook<T> extends HookState<AsyncSnapshot<T>, _FutureHook<T>> {
@@ -170,7 +170,7 @@ class _StreamHook<T> extends Hook<AsyncSnapshot<T>> {
   final bool preserveState;
 
   @override
-  _StreamHookState<T> createState() => _StreamHookState<T>();
+  _StreamHookState<T> createState(keys, beforeState) => _StreamHookState<T>();
 }
 
 /// a clone of [StreamBuilderBase] implementation
@@ -298,7 +298,7 @@ class _StreamControllerHook<T> extends Hook<StreamController<T>> {
   final VoidCallback? onCancel;
 
   @override
-  _StreamControllerHookState<T> createState() =>
+  _StreamControllerHookState<T> createState(keys, beforeState) =>
       _StreamControllerHookState<T>();
 }
 
@@ -377,7 +377,8 @@ class _OnStreamChangeHook<T> extends Hook<StreamSubscription<T>?> {
   final bool? cancelOnError;
 
   @override
-  _StreamListenerHookState<T> createState() => _StreamListenerHookState<T>();
+  _StreamListenerHookState<T> createState(keys, beforeState) =>
+      _StreamListenerHookState<T>();
 }
 
 class _StreamListenerHookState<T>

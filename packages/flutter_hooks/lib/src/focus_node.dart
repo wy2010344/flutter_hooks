@@ -38,7 +38,7 @@ class _FocusNodeHook extends Hook<FocusNode> {
   final bool descendantsAreFocusable;
 
   @override
-  _FocusNodeHookState createState() {
+  _FocusNodeHookState createState(keys, beforeState) {
     return _FocusNodeHookState();
   }
 }

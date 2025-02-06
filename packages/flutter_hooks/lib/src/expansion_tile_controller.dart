@@ -12,8 +12,9 @@ class _ExpansionTileControllerHook extends Hook<ExpansionTileController> {
   const _ExpansionTileControllerHook({List<Object?>? keys}) : super(keys: keys);
 
   @override
-  HookState<ExpansionTileController, Hook<ExpansionTileController>>
-      createState() => _ExpansionTileControllerHookState();
+  HookState<ExpansionTileController, Hook<ExpansionTileController>> createState(
+          keys, beforeState) =>
+      _ExpansionTileControllerHookState();
 }
 
 class _ExpansionTileControllerHookState

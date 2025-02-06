@@ -35,7 +35,7 @@ class _FixedExtentScrollControllerHook
 
   @override
   HookState<FixedExtentScrollController, Hook<FixedExtentScrollController>>
-      createState() => _FixedExtentScrollControllerHookState();
+      createState(keys, beforeState) => _FixedExtentScrollControllerHookState();
 }
 
 class _FixedExtentScrollControllerHookState extends HookState<

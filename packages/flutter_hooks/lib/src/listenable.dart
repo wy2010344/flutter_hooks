@@ -15,7 +15,7 @@ class _UseValueListenableHook extends _ListenableHook {
       : super(animation);
 
   @override
-  _UseValueListenableStateHook createState() {
+  _UseValueListenableStateHook createState(keys, beforeState) {
     return _UseValueListenableStateHook();
   }
 }
@@ -45,7 +45,7 @@ class _ListenableHook extends Hook<void> {
   final Listenable? listenable;
 
   @override
-  _ListenableStateHook createState() => _ListenableStateHook();
+  _ListenableStateHook createState(keys, beforeState) => _ListenableStateHook();
 }
 
 class _ListenableStateHook extends HookState<void, _ListenableHook> {
@@ -107,7 +107,7 @@ class _ValueNotifierHook<T> extends Hook<ValueNotifier<T>> {
   final T initialData;
 
   @override
-  _UseValueNotifierHookState<T> createState() =>
+  _UseValueNotifierHookState<T> createState(keys, beforeState) =>
       _UseValueNotifierHookState<T>();
 }
 
@@ -157,7 +157,8 @@ class _OnListenableChangeHook extends Hook<void> {
   final VoidCallback listener;
 
   @override
-  _OnListenableChangeHookState createState() => _OnListenableChangeHookState();
+  _OnListenableChangeHookState createState(keys, beforeState) =>
+      _OnListenableChangeHookState();
 }
 
 class _OnListenableChangeHookState

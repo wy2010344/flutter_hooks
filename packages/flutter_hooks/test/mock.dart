@@ -42,7 +42,7 @@ class HookTest<R> extends Hook<R?> {
   final HookStateTest<R> Function()? createStateFn;
 
   @override
-  HookStateTest<R> createState() =>
+  HookStateTest<R> createState(keys, beforeState) =>
       createStateFn != null ? createStateFn!() : HookStateTest<R>();
 }
 

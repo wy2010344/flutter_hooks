@@ -59,7 +59,7 @@ class _ReducerHook<State, Action> extends Hook<Store<State, Action>> {
   final Action initialAction;
 
   @override
-  _ReducerHookState<State, Action> createState() =>
+  _ReducerHookState<State, Action> createState(keys, beforeState) =>
       _ReducerHookState<State, Action>();
 }
 
@@ -108,7 +108,7 @@ class _PreviousHook<T> extends Hook<T?> {
   final T value;
 
   @override
-  _PreviousHookState<T> createState() => _PreviousHookState();
+  _PreviousHookState<T> createState(keys, beforeState) => _PreviousHookState();
 }
 
 class _PreviousHookState<T> extends HookState<T?, _PreviousHook<T>> {
@@ -148,7 +148,7 @@ class _ReassembleHook extends Hook<void> {
   final VoidCallback callback;
 
   @override
-  _ReassembleHookState createState() => _ReassembleHookState();
+  _ReassembleHookState createState(keys, beforeState) => _ReassembleHookState();
 }
 
 class _ReassembleHookState extends HookState<void, _ReassembleHook> {
@@ -196,7 +196,7 @@ class _IsMountedHook extends Hook<IsMounted> {
   const _IsMountedHook();
 
   @override
-  _IsMountedHookState createState() => _IsMountedHookState();
+  _IsMountedHookState createState(keys, beforeState) => _IsMountedHookState();
 }
 
 // ignore: deprecated_member_use_from_same_package

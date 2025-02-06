@@ -26,7 +26,8 @@ class _PlatformBrightnessHook extends Hook<Brightness> {
   final BrightnessCallback? onBrightnessChange;
 
   @override
-  _PlatformBrightnessState createState() => _PlatformBrightnessState();
+  _PlatformBrightnessState createState(keys, beforeState) =>
+      _PlatformBrightnessState();
 }
 
 class _PlatformBrightnessState

@@ -34,7 +34,7 @@ class _FocusScopeNodeHook extends Hook<FocusScopeNode> {
   final bool canRequestFocus;
 
   @override
-  _FocusScopeNodeHookState createState() {
+  _FocusScopeNodeHookState createState(keys, beforeState) {
     return _FocusScopeNodeHookState();
   }
 }

@@ -38,7 +38,7 @@ class _ListenableSelectorHook<R> extends Hook<R> {
   final R Function() selector;
 
   @override
-  _ListenableSelectorHookState<R> createState() =>
+  _ListenableSelectorHookState<R> createState(keys, beforeState) =>
       _ListenableSelectorHookState<R>();
 }
 

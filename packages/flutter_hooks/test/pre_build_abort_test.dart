@@ -262,7 +262,7 @@ class IsPositiveHook extends Hook<bool> {
   final ValueNotifier<int> notifier;
 
   @override
-  IsPositiveHookState createState() {
+  IsPositiveHookState createState(keys, beforeState) {
     return IsPositiveHookState();
   }
 }
@@ -318,7 +318,7 @@ class MayRebuild extends Hook<MayRebuildState> {
   final ShouldRebuildMock? shouldRebuild;
 
   @override
-  MayRebuildState createState() {
+  MayRebuildState createState(keys, beforeState) {
     return MayRebuildState();
   }
 }

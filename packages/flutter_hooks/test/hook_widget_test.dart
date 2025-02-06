@@ -6,7 +6,8 @@ import 'mock.dart';
 
 class InheritedInitHook extends Hook<void> {
   @override
-  InheritedInitHookState createState() => InheritedInitHookState();
+  InheritedInitHookState createState(keys, beforeState) =>
+      InheritedInitHookState();
 }
 
 class InheritedInitHookState extends HookState<void, InheritedInitHook> {
@@ -475,7 +476,7 @@ void main() {
 
     final createState =
         MockCreateState<HookStateTest<int?>>(HookStateTest<int?>());
-    // when(createState()).thenReturn(HookStateTest<int>());
+    // when(createState(keys,beforeState)).thenReturn(HookStateTest<int>());
 
     late HookTest<int?> hookTest;
 
@@ -1242,7 +1243,7 @@ void main() {
 
 class MayHaveChangedOnReassemble extends Hook<void> {
   @override
-  MayHaveChangedOnReassembleState createState() =>
+  MayHaveChangedOnReassembleState createState(keys, beforeState) =>
       MayHaveChangedOnReassembleState();
 }
 
@@ -1264,7 +1265,7 @@ class MayHaveChangedOnReassembleState
 
 class MyHook extends Hook<MyHookState> {
   @override
-  MyHookState createState() => MyHookState();
+  MyHookState createState(keys, beforeState) => MyHookState();
 }
 
 class MyHookState extends HookState<MyHookState, MyHook> {

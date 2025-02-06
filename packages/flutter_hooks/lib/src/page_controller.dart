@@ -41,7 +41,8 @@ class _PageControllerHook extends Hook<PageController> {
   final ScrollControllerCallback? onDetach;
 
   @override
-  HookState<PageController, Hook<PageController>> createState() =>
+  HookState<PageController, Hook<PageController>> createState(
+          keys, beforeState) =>
       _PageControllerHookState();
 }
 
