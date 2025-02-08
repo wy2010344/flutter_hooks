@@ -62,8 +62,8 @@ void main() {
 
     await tester.pumpWidget(
       HookBuilder(builder: (c) {
-        useEffect(() => first, [0]);
-        useEffect(() => second, [0]);
+        useEffect((e) => first, [0]);
+        useEffect((e) => second, [0]);
         return Container();
       }),
     );
@@ -73,15 +73,15 @@ void main() {
 
     await tester.pumpWidget(
       HookBuilder(builder: (c) {
-        useEffect(() => first, [1]);
-        useEffect(() => second, [1]);
+        useEffect((e) => first, [1]);
+        useEffect((e) => second, [1]);
         return Container();
       }),
     );
 
     verifyInOrder([
-      second(),
-      first(),
+      second(fakeEffectDeposeEvent),
+      first(fakeEffectDeposeEvent),
     ]);
     verifyNoMoreInteractions(first);
     verifyNoMoreInteractions(second);
@@ -89,8 +89,8 @@ void main() {
     await tester.pumpWidget(Container());
 
     verifyInOrder([
-      second(),
-      first(),
+      second(fakeEffectDeposeEvent),
+      first(fakeEffectDeposeEvent),
     ]);
     verifyNoMoreInteractions(first);
     verifyNoMoreInteractions(second);
@@ -101,8 +101,8 @@ void main() {
 
     await tester.pumpWidget(
       HookBuilder(builder: (c) {
-        useEffect(() => first);
-        useEffect(() => second);
+        useEffect((e) => first);
+        useEffect((e) => second);
         return Container();
       }),
     );
@@ -113,8 +113,8 @@ void main() {
     await tester.pumpWidget(Container());
 
     verifyInOrder([
-      second(),
-      first(),
+      second(fakeEffectDeposeEvent),
+      first(fakeEffectDeposeEvent),
     ]);
     verifyNoMoreInteractions(first);
     verifyNoMoreInteractions(second);
@@ -423,7 +423,7 @@ void main() {
 
     expect(tester.takeException(), 0);
 
-    verify(dispose()).called(1);
+    verify(dispose(fakeEffectDeposeEvent)).called(1);
     verifyNoMoreInteractions(dispose);
 
     await tester.pumpWidget(
@@ -457,7 +457,7 @@ void main() {
       }),
     );
 
-    verify(dispose()).called(1);
+    verify(dispose(fakeEffectDeposeEvent)).called(1);
     verifyZeroInteractions(dispose2);
 
     await tester.pumpWidget(
@@ -468,7 +468,7 @@ void main() {
       }),
     );
 
-    verify(dispose2()).called(1);
+    verify(dispose2(fakeEffectDeposeEvent)).called(1);
     verifyNoMoreInteractions(dispose);
   });
   testWidgets('keys recreate hookstate', (tester) async {
@@ -522,7 +522,7 @@ void main() {
       createState(),
       initHook(),
       build(context),
-      dispose(),
+      dispose(fakeEffectDeposeEvent),
     ]);
     verifyNoMoreHookInteraction();
 
@@ -557,7 +557,7 @@ void main() {
       createState(),
       initHook(),
       build(context),
-      dispose(),
+      dispose(fakeEffectDeposeEvent),
     ]);
     verifyNoMoreHookInteraction();
   });
@@ -633,7 +633,7 @@ void main() {
 
     await tester.pumpWidget(const SizedBox());
 
-    verify(dispose()).called(1);
+    verify(dispose(fakeEffectDeposeEvent)).called(1);
     verifyNoMoreHookInteraction();
   });
 
@@ -650,14 +650,14 @@ void main() {
       }),
     );
 
-    when(dispose()).thenThrow(24);
+    when(dispose(fakeEffectDeposeEvent)).thenThrow(24);
     await tester.pumpWidget(const SizedBox());
 
     expect(tester.takeException(), 24);
 
     verifyInOrder([
-      dispose2(),
-      dispose(),
+      dispose2(fakeEffectDeposeEvent),
+      dispose(fakeEffectDeposeEvent),
     ]);
   });
 
@@ -691,7 +691,7 @@ void main() {
     ]);
     verifyNever(didUpdateHook(hook));
     verifyNever(initHook());
-    verifyNever(dispose());
+    verifyNever(dispose(fakeEffectDeposeEvent));
   });
 
   testWidgets('rebuild with different hooks crash', (tester) async {
@@ -798,7 +798,7 @@ void main() {
       build(any),
     ]);
     verifyNever(initHook());
-    verifyNever(dispose());
+    verifyNever(dispose(fakeEffectDeposeEvent));
   });
 
   testWidgets('hot-reload calls reassemble', (tester) async {
@@ -949,7 +949,7 @@ void main() {
       build2(context),
       initHook(),
       build(any),
-      dispose(),
+      dispose(fakeEffectDeposeEvent),
     ]);
     verifyNoMoreInteractions(didUpdateHook);
     verifyNoMoreInteractions(dispose);
@@ -999,8 +999,8 @@ void main() {
     );
 
     verifyInOrder([
-      dispose2(),
-      dispose(),
+      dispose2(fakeEffectDeposeEvent),
+      dispose(fakeEffectDeposeEvent),
     ]);
 
     verifyNoMoreInteractions(initHook);
@@ -1102,9 +1102,9 @@ void main() {
       build3(context),
       initHook4(),
       build4(context),
-      dispose4(),
-      dispose3(),
-      dispose2(),
+      dispose4(fakeEffectDeposeEvent),
+      dispose3(fakeEffectDeposeEvent),
+      dispose2(fakeEffectDeposeEvent),
     ]);
     verifyZeroInteractions(initHook);
     verifyZeroInteractions(dispose);
@@ -1197,9 +1197,9 @@ void main() {
       build3(context),
       initHook4(),
       build4(context),
-      dispose4(),
-      dispose3(),
-      dispose2(),
+      dispose4(fakeEffectDeposeEvent),
+      dispose3(fakeEffectDeposeEvent),
+      dispose2(fakeEffectDeposeEvent),
     ]);
     verifyZeroInteractions(initHook);
     verifyZeroInteractions(dispose);

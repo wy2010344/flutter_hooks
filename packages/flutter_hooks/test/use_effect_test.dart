@@ -26,7 +26,7 @@ void main() {
   testWidgets('debugFillProperties', (tester) async {
     await tester.pumpWidget(
       HookBuilder(builder: (context) {
-        useEffect(() {
+        useEffect((e) {
           return null;
         }, []);
         return const SizedBox();
@@ -51,7 +51,7 @@ void main() {
     final effect = MockEffect();
     final dispose = MockDispose();
 
-    when(effect()).thenReturn(dispose);
+    when(effect(fakeEffectEvent)).thenReturn(dispose);
 
     Widget builder() {
       return HookBuilder(builder: (context) {
@@ -64,7 +64,7 @@ void main() {
     await tester.pumpWidget(builder());
 
     verifyInOrder([
-      effect(),
+      effect(fakeEffectEvent),
       unrelated(),
     ]);
     verifyNoMoreInteractions(dispose);
@@ -73,8 +73,8 @@ void main() {
     await tester.pumpWidget(builder());
 
     verifyInOrder([
-      dispose(),
-      effect(),
+      dispose(fakeEffectDeposeEvent),
+      effect(fakeEffectEvent),
       unrelated(),
     ]);
     verifyNoMoreInteractions(dispose);
@@ -87,7 +87,7 @@ void main() {
     await tester.pumpWidget(builder());
 
     verifyInOrder([
-      effect(),
+      effect(fakeEffectEvent),
       unrelated(),
     ]);
     verifyNoMoreInteractions(effect);
@@ -96,7 +96,7 @@ void main() {
     await tester.pumpWidget(builder());
 
     verifyInOrder([
-      effect(),
+      effect(fakeEffectEvent),
       unrelated(),
     ]);
     verifyNoMoreInteractions(effect);
@@ -107,7 +107,7 @@ void main() {
     await tester.pumpWidget(builder());
 
     verifyInOrder([
-      effect(),
+      effect(fakeEffectEvent),
       unrelated(),
     ]);
     verifyNoMoreInteractions(effect);
@@ -116,7 +116,7 @@ void main() {
     await tester.pumpWidget(builder());
 
     verifyInOrder([
-      effect(),
+      effect(fakeEffectEvent),
       unrelated(),
     ]);
     verifyNoMoreInteractions(effect);
@@ -127,7 +127,7 @@ void main() {
     await tester.pumpWidget(builder());
 
     verifyInOrder([
-      effect(),
+      effect(fakeEffectEvent),
       unrelated(),
     ]);
     verifyNoMoreInteractions(effect);
@@ -136,7 +136,7 @@ void main() {
     await tester.pumpWidget(builder());
 
     verifyInOrder([
-      effect(),
+      effect(fakeEffectEvent),
       unrelated(),
     ]);
     verifyNoMoreInteractions(effect);
@@ -146,7 +146,7 @@ void main() {
     await tester.pumpWidget(builder());
 
     verifyInOrder([
-      effect(),
+      effect(fakeEffectEvent),
       unrelated(),
     ]);
     verifyNoMoreInteractions(effect);
@@ -155,7 +155,7 @@ void main() {
     await tester.pumpWidget(builder());
 
     verifyInOrder([
-      effect(),
+      effect(fakeEffectEvent),
       unrelated(),
     ]);
     verifyNoMoreInteractions(effect);
@@ -167,7 +167,7 @@ void main() {
     await tester.pumpWidget(builder());
 
     verifyInOrder([
-      effect(),
+      effect(fakeEffectEvent),
       unrelated(),
     ]);
     verifyNoMoreInteractions(effect);
@@ -184,7 +184,7 @@ void main() {
     await tester.pumpWidget(builder());
 
     verifyInOrder([
-      effect(),
+      effect(fakeEffectEvent),
       unrelated(),
     ]);
     verifyNoMoreInteractions(effect);
@@ -198,6 +198,7 @@ void main() {
   testWidgets('useEffect disposer called whenever callback called',
       (tester) async {
     final effect = MockEffect();
+    ;
     List<Object>? parameters;
 
     Widget builder() {
@@ -209,11 +210,11 @@ void main() {
 
     parameters = ['foo'];
     final disposerA = MockDispose();
-    when(effect()).thenReturn(disposerA);
+    when(effect(fakeEffectEvent)).thenReturn(disposerA);
 
     await tester.pumpWidget(builder());
 
-    verify(effect()).called(1);
+    verify(effect(fakeEffectEvent)).called(1);
     verifyNoMoreInteractions(effect);
     verifyZeroInteractions(disposerA);
 
@@ -224,13 +225,13 @@ void main() {
 
     parameters = ['bar'];
     final disposerB = MockDispose();
-    when(effect()).thenReturn(disposerB);
+    when(effect(fakeEffectEvent)).thenReturn(disposerB);
 
     await tester.pumpWidget(builder());
 
     verifyInOrder([
-      effect(),
-      disposerA(),
+      effect(fakeEffectEvent),
+      disposerA(fakeEffectDeposeEvent),
     ]);
     verifyNoMoreInteractions(disposerA);
     verifyNoMoreInteractions(effect);
@@ -244,7 +245,7 @@ void main() {
 
     await tester.pumpWidget(Container());
 
-    verify(disposerB()).called(1);
+    verify(disposerB(fakeEffectDeposeEvent)).called(1);
     verifyNoMoreInteractions(disposerB);
     verifyNoMoreInteractions(disposerA);
     verifyNoMoreInteractions(effect);
@@ -257,7 +258,7 @@ void main() {
     await tester.pumpWidget(builder());
 
     verifyInOrder([
-      effect(),
+      effect(fakeEffectEvent),
       unrelated(),
     ]);
     verifyNoMoreInteractions(effect);
@@ -276,7 +277,7 @@ void main() {
     await tester.pumpWidget(builder());
 
     verifyInOrder([
-      effect(),
+      effect(fakeEffectEvent),
       unrelated(),
     ]);
     verifyNoMoreInteractions(effect);
@@ -285,7 +286,7 @@ void main() {
     await tester.pumpWidget(builder());
 
     verifyInOrder([
-      effect(),
+      effect(fakeEffectEvent),
       unrelated(),
     ]);
     verifyNoMoreInteractions(effect);
@@ -298,7 +299,7 @@ void main() {
     await tester.pumpWidget(builder());
 
     verifyInOrder([
-      effect(),
+      effect(fakeEffectEvent),
       unrelated(),
     ]);
     verifyNoMoreInteractions(effect);
@@ -307,7 +308,7 @@ void main() {
     await tester.pumpWidget(builder());
 
     verifyInOrder([
-      effect(),
+      effect(fakeEffectEvent),
       unrelated(),
     ]);
     verifyNoMoreInteractions(effect);
@@ -316,7 +317,7 @@ void main() {
     await tester.pumpWidget(builder());
 
     verifyInOrder([
-      effect(),
+      effect(fakeEffectEvent),
       unrelated(),
     ]);
     verifyNoMoreInteractions(effect);
@@ -330,7 +331,7 @@ void main() {
     await tester.pumpWidget(builder());
 
     verifyInOrder([
-      effect(),
+      effect(fakeEffectEvent),
       unrelated(),
     ]);
     verifyNoMoreInteractions(effect);
@@ -339,7 +340,7 @@ void main() {
     await tester.pumpWidget(builder());
 
     verifyInOrder([
-      effect(),
+      effect(fakeEffectEvent),
       unrelated(),
     ]);
     verifyNoMoreInteractions(effect);
@@ -347,7 +348,7 @@ void main() {
 }
 
 class MockEffect extends Mock {
-  VoidCallback? call();
+  Dispose? call(EffectEvent e);
 }
 
 class MockWidgetBuild extends Mock {

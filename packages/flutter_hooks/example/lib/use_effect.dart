@@ -57,7 +57,7 @@ StreamController<int> _useLocalStorageInt(
   // Pass a callback to the useEffect hook. This function should be called on
   // first build and every time the controller or key changes
   useEffect(
-    () {
+    (e) {
       // Listen to the StreamController, and when a value is added, store it
       // using SharedPrefs.
       final sub = controller.stream.listen((data) async {
@@ -66,7 +66,7 @@ StreamController<int> _useLocalStorageInt(
       });
       // Unsubscribe when the widget is disposed
       // or on controller/key change
-      return sub.cancel;
+      return (e) => sub.cancel();
     },
     // Pass the controller and key to the useEffect hook. This will ensure the
     // useEffect hook is only called the first build or when one of the the
@@ -77,7 +77,7 @@ StreamController<int> _useLocalStorageInt(
   // Load the initial value from local storage and add it as the initial value
   // to the controller
   useEffect(
-    () {
+    (e) {
       SharedPreferences.getInstance().then<void>((prefs) async {
         final int? valueFromStorage = prefs.getInt(key);
         controller.add(valueFromStorage ?? defaultValue);

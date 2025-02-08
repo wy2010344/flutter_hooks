@@ -33,7 +33,7 @@ class HookTest<R> extends Hook<R?> {
   }) : super(keys: keys);
 
   final R Function(BuildContext context)? build;
-  final void Function()? dispose;
+  final void Function(EffectDisposeEvent e)? dispose;
   final void Function()? didBuild;
   final void Function()? initHook;
   final void Function()? deactivate;
@@ -46,6 +46,24 @@ class HookTest<R> extends Hook<R?> {
       createStateFn != null ? createStateFn!() : HookStateTest<R>();
 }
 
+class _FakeEffectDepose with EffectDisposeEvent {
+  _FakeEffectDepose(this.isDestroy, this.trigger);
+  var isDestroy;
+  var trigger;
+}
+
+final fakeEffectDeposeEvent = _FakeEffectDepose(false, []);
+
+class _FakeEffectEvent with EffectEvent {
+  List<Object?>? trigger;
+  //是否是第一次执行
+  bool isInit = false;
+  //上一次的触发
+  List<Object?>? beforeTrigger;
+}
+
+final fakeEffectEvent = _FakeEffectEvent();
+
 class HookStateTest<R> extends HookState<R?, HookTest<R>> {
   @override
   void initHook() {
@@ -54,8 +72,8 @@ class HookStateTest<R> extends HookState<R?, HookTest<R>> {
   }
 
   @override
-  void dispose() {
-    hook.dispose?.call();
+  void dispose(last) {
+    hook.dispose?.call(fakeEffectDeposeEvent);
   }
 
   @override
@@ -155,5 +173,5 @@ class MockDidUpdateHook extends Mock {
 }
 
 class MockDispose extends Mock {
-  void call();
+  void call(EffectDisposeEvent e);
 }

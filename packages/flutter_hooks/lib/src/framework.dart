@@ -1,4 +1,5 @@
 import 'dart:collection';
+import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
@@ -83,7 +84,7 @@ R use<R>(Hook<R> hook) => Hook.use(hook);
 ///   );
 ///
 ///   @override
-///   void dispose() {
+///   void dispose(last) {
 ///     _controller.dispose();
 ///     super.dispose();
 ///   }
@@ -250,7 +251,7 @@ abstract class HookState<R, T extends Hook<R>> with Diagnosticable {
 
   /// Equivalent of [State.dispose] for [HookState].
   @protected
-  void dispose() {}
+  void dispose(bool last) {}
 
   /// Called everytime the [HookState] is requested.
   ///
@@ -339,8 +340,10 @@ extension on HookElement {
 
     final state = hook.createState(hook.keys, beforeState)
       .._element = this
-      .._hook = hook
-      ..initHook();
+      .._hook = hook;
+
+    _needInit ??= [];
+    _needInit!.add(state);
 
     assert(() {
       _debugIsInitHook = false;
@@ -378,6 +381,7 @@ mixin HookElement on ComponentElement {
   final _hooks = LinkedList<_Entry<HookState<Object?, Hook<Object?>>>>();
   final _shouldRebuildQueue = LinkedList<_Entry<bool Function()>>();
   LinkedList<_Entry<HookState<Object?, Hook<Object?>>>>? _needDispose;
+  List<HookState<Object?, Hook<Object?>>>? _needInit;
   bool? _isOptionalRebuild = false;
   Widget? _buildCache;
 
@@ -447,9 +451,16 @@ mixin HookElement on ComponentElement {
                 _needDispose!.last;
             toDispose != null;
             toDispose = toDispose.previous) {
-          toDispose.value.dispose();
+          toDispose.value.dispose(false);
         }
         _needDispose = null;
+      }
+      if (_needInit != null && _needInit!.isNotEmpty) {
+        //在销毁后初始化
+        for (var e in _needInit!) {
+          e.initHook();
+        }
+        _needInit = null;
       }
     }
 
@@ -475,6 +486,7 @@ Type mismatch between hooks:
     } else if (hook != _currentHookState!.value.hook) {
       final previousHook = _currentHookState!.value.hook;
       if (Hook.shouldPreserveState(previousHook, hook)) {
+        //如果不需要更新,更新旧hook里的方法,同时旧state里的hook更新成新的
         _currentHookState!.value
           .._hook = hook
           ..didUpdateHook(previousHook);
@@ -515,7 +527,7 @@ Type mismatch between hooks:
           hook != null;
           hook = hook.previous) {
         try {
-          hook.value.dispose();
+          hook.value.dispose(true);
         } catch (exception, stack) {
           FlutterError.reportError(
             FlutterErrorDetails(

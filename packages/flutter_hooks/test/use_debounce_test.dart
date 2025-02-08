@@ -55,7 +55,7 @@ void main() {
               const Duration(milliseconds: 500),
             );
 
-            useEffect(() {
+            useEffect((e) {
               textValueNotifier.value = 'World';
               return null;
             }, [textValueNotifier.value]);

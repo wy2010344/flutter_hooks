@@ -137,7 +137,7 @@ class _AnimationControllerHookState
   }
 
   @override
-  void dispose() {
+  void dispose(last) {
     _animationController.dispose();
   }
 
@@ -193,7 +193,7 @@ class _TickerProviderHookState
   }
 
   @override
-  void dispose() {
+  void dispose(last) {
     assert(() {
       if (_ticker == null || !_ticker!.isActive) {
         return true;
@@ -206,7 +206,7 @@ class _TickerProviderHookState
     }(), '');
     _tickerModeNotifier?.removeListener(_updateTicker);
     _tickerModeNotifier = null;
-    super.dispose();
+    super.dispose(last);
   }
 
   @override

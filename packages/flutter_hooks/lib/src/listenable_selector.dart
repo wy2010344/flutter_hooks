@@ -82,7 +82,7 @@ class _ListenableSelectorHookState<R>
   }
 
   @override
-  void dispose() {
+  void dispose(last) {
     hook.listenable?.removeListener(_listener);
   }
 

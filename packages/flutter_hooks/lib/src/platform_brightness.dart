@@ -51,9 +51,9 @@ class _PlatformBrightnessState
   Brightness build(BuildContext context) => _brightness;
 
   @override
-  void dispose() {
+  void dispose(last) {
     WidgetsBinding.instance.removeObserver(this);
-    super.dispose();
+    super.dispose(last);
   }
 
   @override

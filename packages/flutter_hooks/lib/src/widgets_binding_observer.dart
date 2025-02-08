@@ -48,8 +48,8 @@ class __AppLifecycleStateState
   AppLifecycleState? build(BuildContext context) => _state;
 
   @override
-  void dispose() {
-    super.dispose();
+  void dispose(last) {
+    super.dispose(last);
     WidgetsBinding.instance.removeObserver(this);
   }
 

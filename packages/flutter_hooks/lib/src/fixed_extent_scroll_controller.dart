@@ -50,7 +50,7 @@ class _FixedExtentScrollControllerHookState extends HookState<
   FixedExtentScrollController build(BuildContext context) => controller;
 
   @override
-  void dispose() => controller.dispose();
+  void dispose(last) => controller.dispose();
 
   @override
   String get debugLabel => 'useFixedExtentScrollController';

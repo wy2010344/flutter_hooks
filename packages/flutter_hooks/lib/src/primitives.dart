@@ -191,8 +191,13 @@ class _ValueChangedHookState<T, R>
   }
 }
 
+mixin EffectDisposeEvent {
+  late bool isDestroy;
+  List<Object?>? trigger;
+}
+
 /// A function called when the state of a widget is destroyed.
-typedef Dispose = void Function();
+typedef Dispose = void Function(EffectDisposeEvent e);
 
 /// Useful for side-effects and optionally canceling them.
 ///
@@ -221,30 +226,50 @@ typedef Dispose = void Function();
 ///   [stream],
 /// );
 /// ```
-void useEffect(Dispose? Function() effect, [List<Object?>? keys]) {
+void useEffect(Dispose? Function(EffectEvent e) effect, [List<Object?>? keys]) {
   use(_EffectHook(effect, keys));
+}
+
+// memo event
+mixin EffectEvent {
+  List<Object?>? trigger;
+  //是否是第一次执行
+  late bool isInit;
+  //上一次的触发
+  List<Object?>? beforeTrigger;
 }
 
 class _EffectHook extends Hook<void> {
   const _EffectHook(this.effect, [List<Object?>? keys]) : super(keys: keys);
 
-  final Dispose? Function() effect;
+  final Dispose? Function(EffectEvent e) effect;
 
   @override
   _EffectHookState createState(
     keys,
     beforeState,
-  ) =>
-      _EffectHookState();
+  ) {
+    final bs = beforeState as _EffectHookState?;
+    return _EffectHookState(keys, bs == null, bs?.trigger);
+  }
 }
 
-class _EffectHookState extends HookState<void, _EffectHook> {
+class _EffectHookState extends HookState<void, _EffectHook>
+    with EffectEvent, EffectDisposeEvent {
+  _EffectHookState(this.trigger, this.isInit, this.beforeTrigger);
+  final List<Object?>? trigger;
+  final bool isInit;
+  final List<Object?>? beforeTrigger;
+  bool isDestroy = false;
+
   Dispose? disposer;
 
   @override
   void initHook() {
     super.initHook();
-    scheduleEffect();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      scheduleEffect();
+    });
   }
 
   @override
@@ -252,8 +277,10 @@ class _EffectHookState extends HookState<void, _EffectHook> {
     super.didUpdateHook(oldHook);
 
     if (hook.keys == null) {
-      disposer?.call();
-      scheduleEffect();
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        disposer?.call(this);
+        scheduleEffect();
+      });
     }
   }
 
@@ -261,10 +288,15 @@ class _EffectHookState extends HookState<void, _EffectHook> {
   void build(BuildContext context) {}
 
   @override
-  void dispose() => disposer?.call();
+  void dispose(last) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      this.isDestroy = last;
+      disposer?.call(this);
+    });
+  }
 
   void scheduleEffect() {
-    disposer = hook.effect();
+    disposer = hook.effect(this);
   }
 
   @override
@@ -324,7 +356,7 @@ class _StateHookState<T> extends HookState<ValueNotifier<T>, _StateHook<T>> {
     ..addListener(_listener);
 
   @override
-  void dispose() {
+  void dispose(last) {
     _state.dispose();
   }
 

@@ -61,7 +61,7 @@ class _FocusScopeNodeHookState
   FocusScopeNode build(BuildContext context) => _focusScopeNode;
 
   @override
-  void dispose() => _focusScopeNode.dispose();
+  void dispose(last) => _focusScopeNode.dispose();
 
   @override
   String get debugLabel => 'useFocusScopeNode';

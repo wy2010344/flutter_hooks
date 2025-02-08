@@ -81,9 +81,9 @@ class _DebouncedHookState<T> extends HookState<T?, _DebouncedHook<T>> {
   String get debugLabel => 'useDebounced<$T>';
 
   @override
-  void dispose() {
+  void dispose(last) {
     _timer?.cancel();
     _timer = null;
-    super.dispose();
+    super.dispose(last);
   }
 }

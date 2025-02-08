@@ -31,5 +31,5 @@ class _DraggableScrollableControllerHookState extends HookState<
   DraggableScrollableController build(BuildContext context) => controller;
 
   @override
-  void dispose() => controller.dispose();
+  void dispose(last) => controller.dispose();
 }

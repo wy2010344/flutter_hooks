@@ -210,9 +210,9 @@ class _IsMountedHookState extends HookState<IsMounted, _IsMountedHook> {
   bool _isMounted() => _mounted;
 
   @override
-  void dispose() {
+  void dispose(last) {
     _mounted = false;
-    super.dispose();
+    super.dispose(last);
   }
 
   @override

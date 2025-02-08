@@ -37,7 +37,7 @@ class _TransformationControllerHookState
   TransformationController build(BuildContext context) => controller;
 
   @override
-  void dispose() => controller.dispose();
+  void dispose(last) => controller.dispose();
 
   @override
   String get debugLabel => 'useTransformationController';

@@ -306,9 +306,9 @@ class IsPositiveHookState extends HookState<bool, IsPositiveHook> {
   }
 
   @override
-  void dispose() {
+  void dispose(last) {
     hook.notifier.removeListener(listener);
-    super.dispose();
+    super.dispose(last);
   }
 }
 
