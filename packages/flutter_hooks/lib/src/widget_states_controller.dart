@@ -10,23 +10,20 @@ WidgetStatesController useWidgetStatesController({
 }) {
   return use(
     _WidgetStatesControllerHook(
+      keys,
       values: values,
-      keys: keys,
     ),
   );
 }
 
-class _WidgetStatesControllerHook extends Hook<WidgetStatesController> {
-  const _WidgetStatesControllerHook({
-    required this.values,
-    super.keys,
-  });
+class _WidgetStatesControllerHook extends ListHook<WidgetStatesController> {
+  const _WidgetStatesControllerHook(super.keys, {required this.values});
 
   final Set<WidgetState>? values;
 
   @override
   HookState<WidgetStatesController, Hook<WidgetStatesController>> createState(
-          keys, beforeState) =>
+          beforeState) =>
       _WidgetStateControllerHookState();
 }
 
@@ -38,7 +35,7 @@ class _WidgetStateControllerHookState
   WidgetStatesController build(BuildContext context) => controller;
 
   @override
-  void dispose(last) => controller.dispose();
+  void dispose(last, newerState) => controller.dispose();
 
   @override
   String get debugLabel => 'useWidgetStatesController';

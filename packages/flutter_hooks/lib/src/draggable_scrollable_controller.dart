@@ -7,17 +7,16 @@ part of 'hooks.dart';
 DraggableScrollableController useDraggableScrollableController({
   List<Object?>? keys,
 }) {
-  return use(_DraggableScrollableControllerHook(keys: keys));
+  return use(_DraggableScrollableControllerHook(keys));
 }
 
 class _DraggableScrollableControllerHook
-    extends Hook<DraggableScrollableController> {
-  const _DraggableScrollableControllerHook({super.keys});
+    extends ListHook<DraggableScrollableController> {
+  const _DraggableScrollableControllerHook(super.keys);
 
   @override
   HookState<DraggableScrollableController, Hook<DraggableScrollableController>>
-      createState(keys, beforeState) =>
-          _DraggableScrollableControllerHookState();
+      createState(beforeState) => _DraggableScrollableControllerHookState();
 }
 
 class _DraggableScrollableControllerHookState extends HookState<
@@ -31,5 +30,5 @@ class _DraggableScrollableControllerHookState extends HookState<
   DraggableScrollableController build(BuildContext context) => controller;
 
   @override
-  void dispose(last) => controller.dispose();
+  void dispose(last, newerState) => controller.dispose();
 }

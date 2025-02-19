@@ -4,6 +4,8 @@ import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
+import '../flutter_hooks.dart';
+
 /// Whether to behave like in release mode or allow hot-reload for hooks.
 ///
 /// `true` by default. It has no impact on release builds.
@@ -73,7 +75,7 @@ R use<R>(Hook<R> hook) => Hook.use(hook);
 /// ```
 /// class Usual extends StatefulWidget {
 ///   @override
-///   _UsualState createState(keys,beforeState) => _UsualState();
+///   _UsualState createState(beforeState) => _UsualState();
 /// }
 ///
 /// class _UsualState extends State<Usual>
@@ -84,7 +86,7 @@ R use<R>(Hook<R> hook) => Hook.use(hook);
 ///   );
 ///
 ///   @override
-///   void dispose(last) {
+///   void dispose(last,beforeState) {
 ///     _controller.dispose();
 ///     super.dispose();
 ///   }
@@ -120,8 +122,10 @@ R use<R>(Hook<R> hook) => Hook.use(hook);
 /// If we were to pass a variable as `duration` instead of a constant, then on value change the [AnimationController] will be updated.
 @immutable
 abstract class Hook<R> with Diagnosticable {
+  const Hook();
+
   /// Allows subclasses to have a `const` constructor
-  const Hook({this.keys});
+  // const Hook({this.keys});
 
   /// Registers a [Hook] and returns its value.
   ///
@@ -145,7 +149,7 @@ Calling them outside of build method leads to an unstable state and is therefore
   /// When a new [Hook] is created, the framework checks if keys matches using [Hook.shouldPreserveState].
   /// If they don't, the previously created [HookState] is disposed, and a new one is created
   /// using [Hook.createState], followed by [HookState.initHook].
-  final List<Object?>? keys;
+  // final List<Object?>? keys;
 
   /// The algorithm to determine if a [HookState] should be reused or disposed.
   ///
@@ -158,48 +162,8 @@ Calling them outside of build method leads to an unstable state and is therefore
   /// There are exceptions when comparing [Hook.keys] before using `operator==`:
   /// - A state is preserved when one of the [Hook.keys] is [double.nan].
   /// - A state is NOT preserved when one of the [Hook.keys] is changed from 0.0 to -0.0.
-  static bool shouldPreserveState(Hook<Object?> hook1, Hook<Object?> hook2) {
-    final p1 = hook1.keys;
-    final p2 = hook2.keys;
-
-    if (p1 == p2) {
-      return true;
-    }
-    // if one list is null and the other one isn't, or if they have different sizes
-    if (p1 == null || p2 == null || p1.length != p2.length) {
-      return false;
-    }
-
-    final i1 = p1.iterator;
-    final i2 = p2.iterator;
-    // ignore: literal_only_boolean_expressions, returns will abort the loop
-    while (true) {
-      if (!i1.moveNext() || !i2.moveNext()) {
-        return true;
-      }
-
-      final curr1 = i1.current;
-      final curr2 = i2.current;
-
-      if (curr1 is num && curr2 is num) {
-        // Checks if both are NaN
-        if (curr1.isNaN && curr2.isNaN) {
-          continue;
-        }
-
-        // Checks if one is 0.0 and the other is -0.0
-        if (curr1 == 0 && curr2 == 0) {
-          if (curr1.isNegative != curr2.isNegative) {
-            return false;
-          }
-          continue;
-        }
-      }
-
-      if (curr1 != curr2) {
-        return false;
-      }
-    }
+  bool shouldPreserveState(Hook<Object?> newHooks) {
+    return true;
   }
 
   /// Creates the mutable state for this [Hook] linked to its widget creator.
@@ -208,14 +172,13 @@ Calling them outside of build method leads to an unstable state and is therefore
   ///
   /// ```
   /// @override
-  /// HookState createState(keys,beforeState) => _MyHookState();
+  /// HookState createState(beforeState) => _MyHookState();
   /// ```
   ///
   /// The framework can call this method multiple times over the lifetime of a [HookWidget]. For example,
   /// if the hook is used multiple times, a separate [HookState] must be created for each usage.
   @protected
-  HookState<R, Hook<R>> createState(
-      List<Object?>? keys, HookState<R, Hook<R>>? beforeState);
+  HookState<R, Hook<R>> createState(HookState<R, Hook<R>>? beforeState);
 }
 
 /// The logic and internal state for a [HookWidget]
@@ -251,7 +214,7 @@ abstract class HookState<R, T extends Hook<R>> with Diagnosticable {
 
   /// Equivalent of [State.dispose] for [HookState].
   @protected
-  void dispose(bool last) {}
+  void dispose(bool last, covariant HookState<R, T>? beforeState) {}
 
   /// Called everytime the [HookState] is requested.
   ///
@@ -299,7 +262,7 @@ abstract class HookState<R, T extends Hook<R>> with Diagnosticable {
     if (_element!._isOptionalRebuild != false) {
       _element!
         .._isOptionalRebuild = true
-        .._shouldRebuildQueue.add(_Entry(shouldRebuild))
+        .._shouldRebuildQueue.add(_Entry(shouldRebuild, null))
         ..markNeedsBuild();
     }
     assert(_element!.dirty, 'Bad state');
@@ -325,9 +288,31 @@ abstract class HookState<R, T extends Hook<R>> with Diagnosticable {
   }
 }
 
-class _Entry<T> extends LinkedListEntry<_Entry<T>> {
-  _Entry(this.value);
+abstract class ListHook<R> extends Hook<R> {
+  const ListHook(this.keys);
+  final List<Object?>? keys;
+  @override
+  bool shouldPreserveState(Hook<Object?> newHooks) {
+    if (newHooks is! ListHook) {
+      return false;
+    }
+    final p1 = this.keys;
+    final p2 = newHooks.keys;
+    if (p1 == p2) {
+      return true;
+    }
+    // if one list is null and the other one isn't, or if they have different sizes
+    if (p1 == null || p2 == null) {
+      return false;
+    }
+    return listDeppEqual(p1, p2);
+  }
+}
+
+base class _Entry<T> extends LinkedListEntry<_Entry<T>> {
+  _Entry(this.value, this.beforeValue);
   T value;
+  T? beforeValue;
 }
 
 extension on HookElement {
@@ -338,7 +323,7 @@ extension on HookElement {
       return true;
     }(), '');
 
-    final state = hook.createState(hook.keys, beforeState)
+    final state = hook.createState(beforeState)
       .._element = this
       .._hook = hook;
 
@@ -355,7 +340,7 @@ extension on HookElement {
 
   void _appendHook<R>(Hook<R> hook) {
     final result = _createHookState<R>(hook, null);
-    _currentHookState = _Entry(result);
+    _currentHookState = _Entry(result, null);
     _hooks.add(_currentHookState!);
   }
 
@@ -451,7 +436,7 @@ mixin HookElement on ComponentElement {
                 _needDispose!.last;
             toDispose != null;
             toDispose = toDispose.previous) {
-          toDispose.value.dispose(false);
+          toDispose.value.dispose(false, toDispose.beforeValue);
         }
         _needDispose = null;
       }
@@ -485,16 +470,17 @@ Type mismatch between hooks:
       }
     } else if (hook != _currentHookState!.value.hook) {
       final previousHook = _currentHookState!.value.hook;
-      if (Hook.shouldPreserveState(previousHook, hook)) {
+      if (previousHook.shouldPreserveState(hook)) {
         //如果不需要更新,更新旧hook里的方法,同时旧state里的hook更新成新的
         _currentHookState!.value
           .._hook = hook
           ..didUpdateHook(previousHook);
       } else {
         _needDispose ??= LinkedList();
-        _needDispose!.add(_Entry(_currentHookState!.value));
-        _currentHookState!.value = _createHookState<R>(
+        final newState = _createHookState<R>(
             hook, _currentHookState?.value as HookState<R, Hook<R>>?);
+        _needDispose!.add(_Entry(_currentHookState!.value, newState));
+        _currentHookState!.value = newState;
       }
     }
 
@@ -527,7 +513,7 @@ Type mismatch between hooks:
           hook != null;
           hook = hook.previous) {
         try {
-          hook.value.dispose(true);
+          hook.value.dispose(true, hook.beforeValue);
         } catch (exception, stack) {
           FlutterError.reportError(
             FlutterErrorDetails(

@@ -15,7 +15,7 @@ class _UseValueListenableHook extends _ListenableHook {
       : super(animation);
 
   @override
-  _UseValueListenableStateHook createState(keys, beforeState) {
+  _UseValueListenableStateHook createState(beforeState) {
     return _UseValueListenableStateHook();
   }
 }
@@ -45,7 +45,7 @@ class _ListenableHook extends Hook<void> {
   final Listenable? listenable;
 
   @override
-  _ListenableStateHook createState(keys, beforeState) => _ListenableStateHook();
+  _ListenableStateHook createState(beforeState) => _ListenableStateHook();
 }
 
 class _ListenableStateHook extends HookState<void, _ListenableHook> {
@@ -72,7 +72,7 @@ class _ListenableStateHook extends HookState<void, _ListenableHook> {
   }
 
   @override
-  void dispose(last) {
+  void dispose(last, newerState) {
     hook.listenable?.removeListener(_listener);
   }
 
@@ -100,14 +100,14 @@ ValueNotifier<T> useValueNotifier<T>(T initialData, [List<Object?>? keys]) {
   );
 }
 
-class _ValueNotifierHook<T> extends Hook<ValueNotifier<T>> {
+class _ValueNotifierHook<T> extends ListHook<ValueNotifier<T>> {
   const _ValueNotifierHook({List<Object?>? keys, required this.initialData})
-      : super(keys: keys);
+      : super(keys);
 
   final T initialData;
 
   @override
-  _UseValueNotifierHookState<T> createState(keys, beforeState) =>
+  _UseValueNotifierHookState<T> createState(beforeState) =>
       _UseValueNotifierHookState<T>();
 }
 
@@ -121,7 +121,7 @@ class _UseValueNotifierHookState<T>
   }
 
   @override
-  void dispose(last) {
+  void dispose(last, newerState) {
     notifier.dispose();
   }
 
@@ -157,7 +157,7 @@ class _OnListenableChangeHook extends Hook<void> {
   final VoidCallback listener;
 
   @override
-  _OnListenableChangeHookState createState(keys, beforeState) =>
+  _OnListenableChangeHookState createState(beforeState) =>
       _OnListenableChangeHookState();
 }
 
@@ -182,7 +182,7 @@ class _OnListenableChangeHookState
   void build(BuildContext context) {}
 
   @override
-  void dispose(last) {
+  void dispose(last, newerState) {
     hook.listenable?.removeListener(_listener);
   }
 

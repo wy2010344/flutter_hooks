@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:flutter_hooks/src/core/use_state.dart';
 
 import 'mock.dart';
 
@@ -262,7 +263,7 @@ class IsPositiveHook extends Hook<bool> {
   final ValueNotifier<int> notifier;
 
   @override
-  IsPositiveHookState createState(keys, beforeState) {
+  IsPositiveHookState createState(beforeState) {
     return IsPositiveHookState();
   }
 }
@@ -306,9 +307,9 @@ class IsPositiveHookState extends HookState<bool, IsPositiveHook> {
   }
 
   @override
-  void dispose(last) {
+  void dispose(last, beforeState) {
     hook.notifier.removeListener(listener);
-    super.dispose(last);
+    super.dispose(last, beforeState);
   }
 }
 
@@ -318,7 +319,7 @@ class MayRebuild extends Hook<MayRebuildState> {
   final ShouldRebuildMock? shouldRebuild;
 
   @override
-  MayRebuildState createState(keys, beforeState) {
+  MayRebuildState createState(beforeState) {
     return MayRebuildState();
   }
 }

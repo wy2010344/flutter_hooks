@@ -38,7 +38,7 @@ class _ListenableSelectorHook<R> extends Hook<R> {
   final R Function() selector;
 
   @override
-  _ListenableSelectorHookState<R> createState(keys, beforeState) =>
+  _ListenableSelectorHookState<R> createState(beforeState) =>
       _ListenableSelectorHookState<R>();
 }
 
@@ -82,7 +82,7 @@ class _ListenableSelectorHookState<R>
   }
 
   @override
-  void dispose(last) {
+  void dispose(last, newerState) {
     hook.listenable?.removeListener(_listener);
   }
 

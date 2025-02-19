@@ -22,21 +22,20 @@ TabController useTabController({
   );
 }
 
-class _TabControllerHook extends Hook<TabController> {
+class _TabControllerHook extends ListHook<TabController> {
   const _TabControllerHook({
     required this.length,
     required this.vsync,
     required this.initialIndex,
     List<Object?>? keys,
-  }) : super(keys: keys);
+  }) : super(keys);
 
   final int length;
   final TickerProvider vsync;
   final int initialIndex;
 
   @override
-  HookState<TabController, Hook<TabController>> createState(
-          keys, beforeState) =>
+  HookState<TabController, Hook<TabController>> createState(beforeState) =>
       _TabControllerHookState();
 }
 
@@ -52,7 +51,7 @@ class _TabControllerHookState
   TabController build(BuildContext context) => controller;
 
   @override
-  void dispose(last) => controller.dispose();
+  void dispose(last, newerState) => controller.dispose();
 
   @override
   String get debugLabel => 'useTabController';

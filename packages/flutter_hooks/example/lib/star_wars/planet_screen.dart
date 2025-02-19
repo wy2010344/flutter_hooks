@@ -34,7 +34,7 @@ class _PlanetHandler {
 class PlanetScreen extends HookWidget {
   @override
   Widget build(BuildContext context) {
-    final api = useMemoized((e) => StarWarsApi());
+    final api = useMemo((e) => StarWarsApi(), emptyList);
 
     final store = useReducer<AppState, ReduxAction?>(
       reducer,
@@ -42,7 +42,7 @@ class PlanetScreen extends HookWidget {
       initialAction: null,
     );
 
-    final planetHandler = useMemoized(
+    final planetHandler = useMemo(
       (e) {
         /// Create planet handler and load the first page.
         /// The first page will only be loaded once, after the handler was created

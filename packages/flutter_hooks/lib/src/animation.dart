@@ -14,7 +14,7 @@ class _UseAnimationHook<T> extends _ListenableHook {
   const _UseAnimationHook(Animation<T> animation) : super(animation);
 
   @override
-  _UseAnimationStateHook createState(keys, beforeState) {
+  _UseAnimationStateHook createState(beforeState) {
     return _UseAnimationStateHook();
   }
 }
@@ -68,7 +68,7 @@ AnimationController useAnimationController({
   );
 }
 
-class _AnimationControllerHook extends Hook<AnimationController> {
+class _AnimationControllerHook extends ListHook<AnimationController> {
   const _AnimationControllerHook({
     this.duration,
     this.reverseDuration,
@@ -79,7 +79,7 @@ class _AnimationControllerHook extends Hook<AnimationController> {
     required this.vsync,
     required this.animationBehavior,
     List<Object?>? keys,
-  }) : super(keys: keys);
+  }) : super(keys);
 
   final Duration? duration;
   final Duration? reverseDuration;
@@ -91,7 +91,7 @@ class _AnimationControllerHook extends Hook<AnimationController> {
   final AnimationBehavior animationBehavior;
 
   @override
-  _AnimationControllerHookState createState(keys, beforeState) =>
+  _AnimationControllerHookState createState(beforeState) =>
       _AnimationControllerHookState();
 
   @override
@@ -137,7 +137,7 @@ class _AnimationControllerHookState
   }
 
   @override
-  void dispose(last) {
+  void dispose(last, newerState) {
     _animationController.dispose();
   }
 
@@ -160,11 +160,11 @@ TickerProvider useSingleTickerProvider({List<Object?>? keys}) {
   );
 }
 
-class _SingleTickerProviderHook extends Hook<TickerProvider> {
-  const _SingleTickerProviderHook([List<Object?>? keys]) : super(keys: keys);
+class _SingleTickerProviderHook extends ListHook<TickerProvider> {
+  const _SingleTickerProviderHook([List<Object?>? keys]) : super(keys);
 
   @override
-  _TickerProviderHookState createState(keys, beforeState) =>
+  _TickerProviderHookState createState(beforeState) =>
       _TickerProviderHookState();
 }
 
@@ -193,7 +193,7 @@ class _TickerProviderHookState
   }
 
   @override
-  void dispose(last) {
+  void dispose(last, newerState) {
     assert(() {
       if (_ticker == null || !_ticker!.isActive) {
         return true;
@@ -206,7 +206,7 @@ class _TickerProviderHookState
     }(), '');
     _tickerModeNotifier?.removeListener(_updateTicker);
     _tickerModeNotifier = null;
-    super.dispose(last);
+    super.dispose(last, newerState);
   }
 
   @override

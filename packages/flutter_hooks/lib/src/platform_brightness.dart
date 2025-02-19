@@ -26,7 +26,7 @@ class _PlatformBrightnessHook extends Hook<Brightness> {
   final BrightnessCallback? onBrightnessChange;
 
   @override
-  _PlatformBrightnessState createState(keys, beforeState) =>
+  _PlatformBrightnessState createState(beforeState) =>
       _PlatformBrightnessState();
 }
 
@@ -51,9 +51,9 @@ class _PlatformBrightnessState
   Brightness build(BuildContext context) => _brightness;
 
   @override
-  void dispose(last) {
+  void dispose(last, newerState) {
     WidgetsBinding.instance.removeObserver(this);
-    super.dispose(last);
+    super.dispose(last, newerState);
   }
 
   @override

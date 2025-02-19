@@ -24,7 +24,7 @@ ScrollController useScrollController({
   );
 }
 
-class _ScrollControllerHook extends Hook<ScrollController> {
+class _ScrollControllerHook extends ListHook<ScrollController> {
   const _ScrollControllerHook({
     required this.initialScrollOffset,
     required this.keepScrollOffset,
@@ -32,7 +32,7 @@ class _ScrollControllerHook extends Hook<ScrollController> {
     this.onAttach,
     this.onDetach,
     List<Object?>? keys,
-  }) : super(keys: keys);
+  }) : super(keys);
 
   final double initialScrollOffset;
   final bool keepScrollOffset;
@@ -42,7 +42,7 @@ class _ScrollControllerHook extends Hook<ScrollController> {
 
   @override
   HookState<ScrollController, Hook<ScrollController>> createState(
-          keys, beforeState) =>
+          beforeState) =>
       _ScrollControllerHookState();
 }
 
@@ -60,7 +60,7 @@ class _ScrollControllerHookState
   ScrollController build(BuildContext context) => controller;
 
   @override
-  void dispose(last) => controller.dispose();
+  void dispose(last, newerState) => controller.dispose();
 
   @override
   String get debugLabel => 'useScrollController';

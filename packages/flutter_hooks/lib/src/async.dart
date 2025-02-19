@@ -8,7 +8,7 @@ part of 'hooks.dart';
 /// The [Future] needs to be created outside of [useFuture].
 /// If the [Future] is created inside [useFuture], then, every time the build
 /// method gets called, the [Future] will be called again. One way to create
-/// the [Future] outside of [useFuture] is by using [useMemoized].
+/// the [Future] outside of [useFuture] is by using [useMemo].
 ///
 /// ```dart
 /// // BAD
@@ -48,7 +48,7 @@ class _FutureHook<T> extends Hook<AsyncSnapshot<T>> {
   final T? initialData;
 
   @override
-  _FutureStateHook<T> createState(keys, beforeState) => _FutureStateHook<T>();
+  _FutureStateHook<T> createState(beforeState) => _FutureStateHook<T>();
 }
 
 class _FutureStateHook<T> extends HookState<AsyncSnapshot<T>, _FutureHook<T>> {
@@ -85,7 +85,7 @@ class _FutureStateHook<T> extends HookState<AsyncSnapshot<T>, _FutureHook<T>> {
   }
 
   @override
-  void dispose(last) {
+  void dispose(last, newerState) {
     _unsubscribe();
   }
 
@@ -170,7 +170,7 @@ class _StreamHook<T> extends Hook<AsyncSnapshot<T>> {
   final bool preserveState;
 
   @override
-  _StreamHookState<T> createState(keys, beforeState) => _StreamHookState<T>();
+  _StreamHookState<T> createState(beforeState) => _StreamHookState<T>();
 }
 
 /// a clone of [StreamBuilderBase] implementation
@@ -201,7 +201,7 @@ class _StreamHookState<T> extends HookState<AsyncSnapshot<T>, _StreamHook<T>> {
   }
 
   @override
-  void dispose(last) {
+  void dispose(last, newerState) {
     _unsubscribe();
   }
 
@@ -285,20 +285,20 @@ StreamController<T> useStreamController<T>({
   );
 }
 
-class _StreamControllerHook<T> extends Hook<StreamController<T>> {
+class _StreamControllerHook<T> extends ListHook<StreamController<T>> {
   const _StreamControllerHook({
     required this.sync,
     this.onListen,
     this.onCancel,
     List<Object?>? keys,
-  }) : super(keys: keys);
+  }) : super(keys);
 
   final bool sync;
   final VoidCallback? onListen;
   final VoidCallback? onCancel;
 
   @override
-  _StreamControllerHookState<T> createState(keys, beforeState) =>
+  _StreamControllerHookState<T> createState(beforeState) =>
       _StreamControllerHookState<T>();
 }
 
@@ -327,7 +327,7 @@ class _StreamControllerHookState<T>
   }
 
   @override
-  void dispose(last) {
+  void dispose(last, newerState) {
     _controller.close();
   }
 
@@ -377,7 +377,7 @@ class _OnStreamChangeHook<T> extends Hook<StreamSubscription<T>?> {
   final bool? cancelOnError;
 
   @override
-  _StreamListenerHookState<T> createState(keys, beforeState) =>
+  _StreamListenerHookState<T> createState(beforeState) =>
       _StreamListenerHookState<T>();
 }
 
@@ -402,7 +402,7 @@ class _StreamListenerHookState<T>
   }
 
   @override
-  void dispose(last) {
+  void dispose(last, newerState) {
     _unsubscribe();
   }
 

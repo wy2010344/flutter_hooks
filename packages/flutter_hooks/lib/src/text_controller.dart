@@ -55,24 +55,24 @@ class _TextEditingControllerHookCreator {
 /// - [TextEditingController], which this hook creates.
 const useTextEditingController = _TextEditingControllerHookCreator();
 
-class _TextEditingControllerHook extends Hook<TextEditingController> {
+class _TextEditingControllerHook extends ListHook<TextEditingController> {
   const _TextEditingControllerHook(
     this.initialText, [
     List<Object?>? keys,
   ])  : initialValue = null,
-        super(keys: keys);
+        super(keys);
 
   const _TextEditingControllerHook.fromValue(
     TextEditingValue this.initialValue, [
     List<Object?>? keys,
   ])  : initialText = null,
-        super(keys: keys);
+        super(keys);
 
   final String? initialText;
   final TextEditingValue? initialValue;
 
   @override
-  _TextEditingControllerHookState createState(keys, beforeState) {
+  _TextEditingControllerHookState createState(beforeState) {
     return _TextEditingControllerHookState();
   }
 }
@@ -87,7 +87,7 @@ class _TextEditingControllerHookState
   TextEditingController build(BuildContext context) => _controller;
 
   @override
-  void dispose(last) => _controller.dispose();
+  void dispose(last, newerState) => _controller.dispose();
 
   @override
   String get debugLabel => 'useTextEditingController';

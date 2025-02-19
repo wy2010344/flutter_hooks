@@ -16,17 +16,17 @@ TransformationController useTransformationController({
   );
 }
 
-class _TransformationControllerHook extends Hook<TransformationController> {
+class _TransformationControllerHook extends ListHook<TransformationController> {
   const _TransformationControllerHook({
     required this.initialValue,
     List<Object?>? keys,
-  }) : super(keys: keys);
+  }) : super(keys);
 
   final Matrix4? initialValue;
 
   @override
   HookState<TransformationController, Hook<TransformationController>>
-      createState(keys, beforeState) => _TransformationControllerHookState();
+      createState(beforeState) => _TransformationControllerHookState();
 }
 
 class _TransformationControllerHookState
@@ -37,7 +37,7 @@ class _TransformationControllerHookState
   TransformationController build(BuildContext context) => controller;
 
   @override
-  void dispose(last) => controller.dispose();
+  void dispose(last, newerState) => controller.dispose();
 
   @override
   String get debugLabel => 'useTransformationController';

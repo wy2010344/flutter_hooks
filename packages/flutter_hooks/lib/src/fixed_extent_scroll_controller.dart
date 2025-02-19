@@ -12,22 +12,18 @@ FixedExtentScrollController useFixedExtentScrollController({
 }) {
   return use(
     _FixedExtentScrollControllerHook(
+      keys,
       initialItem: initialItem,
       onAttach: onAttach,
       onDetach: onDetach,
-      keys: keys,
     ),
   );
 }
 
 class _FixedExtentScrollControllerHook
-    extends Hook<FixedExtentScrollController> {
-  const _FixedExtentScrollControllerHook({
-    required this.initialItem,
-    this.onAttach,
-    this.onDetach,
-    super.keys,
-  });
+    extends ListHook<FixedExtentScrollController> {
+  const _FixedExtentScrollControllerHook(super.keys,
+      {required this.initialItem, this.onAttach, this.onDetach});
 
   final int initialItem;
   final ScrollControllerCallback? onAttach;
@@ -35,7 +31,7 @@ class _FixedExtentScrollControllerHook
 
   @override
   HookState<FixedExtentScrollController, Hook<FixedExtentScrollController>>
-      createState(keys, beforeState) => _FixedExtentScrollControllerHookState();
+      createState(beforeState) => _FixedExtentScrollControllerHookState();
 }
 
 class _FixedExtentScrollControllerHookState extends HookState<
@@ -50,7 +46,7 @@ class _FixedExtentScrollControllerHookState extends HookState<
   FixedExtentScrollController build(BuildContext context) => controller;
 
   @override
-  void dispose(last) => controller.dispose();
+  void dispose(last, newerState) => controller.dispose();
 
   @override
   String get debugLabel => 'useFixedExtentScrollController';

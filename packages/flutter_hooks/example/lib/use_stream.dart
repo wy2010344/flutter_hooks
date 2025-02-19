@@ -19,14 +19,14 @@ class UseStreamExample extends StatelessWidget {
         // marking the entire UseStreamExample as a HookWidget!
         child: HookBuilder(
           builder: (context) {
-            // First, create and cache a Stream with the `useMemoized` hook.
+            // First, create and cache a Stream with the `useMemo` hook.
             // This hook allows you to create an Object (such as a Stream or
             // Future) the first time this builder function is invoked without
             // recreating it on each subsequent build!
-            final stream = useMemoized(
-              (e) => Stream<int>.periodic(
-                  const Duration(seconds: 1), (i) => i + 1),
-            );
+            final stream = useMemo(
+                (e) => Stream<int>.periodic(
+                    const Duration(seconds: 1), (i) => i + 1),
+                emptyList);
             // Next, invoke the `useStream` hook to listen for updates to the
             // Stream. This triggers a rebuild whenever a new value is emitted.
             //

@@ -1,3 +1,10 @@
+export 'package:flutter_hooks/src/core/use_effect.dart';
+export 'package:flutter_hooks/src/core/use_memo.dart';
+export 'package:flutter_hooks/src/core/use_state.dart';
 export 'package:flutter_hooks/src/framework.dart';
+export 'package:flutter_hooks/src/future_call.dart';
+export 'package:flutter_hooks/src/helper/use_callback.dart';
+export 'package:flutter_hooks/src/helper/use_event.dart';
+export 'package:flutter_hooks/src/helper/use_ref.dart';
 export 'package:flutter_hooks/src/hooks.dart';
 export 'package:flutter_hooks/src/util.dart';

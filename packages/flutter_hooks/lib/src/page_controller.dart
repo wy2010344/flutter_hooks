@@ -24,7 +24,7 @@ PageController usePageController({
   );
 }
 
-class _PageControllerHook extends Hook<PageController> {
+class _PageControllerHook extends ListHook<PageController> {
   const _PageControllerHook({
     required this.initialPage,
     required this.keepPage,
@@ -32,7 +32,7 @@ class _PageControllerHook extends Hook<PageController> {
     this.onAttach,
     this.onDetach,
     List<Object?>? keys,
-  }) : super(keys: keys);
+  }) : super(keys);
 
   final int initialPage;
   final bool keepPage;
@@ -41,8 +41,7 @@ class _PageControllerHook extends Hook<PageController> {
   final ScrollControllerCallback? onDetach;
 
   @override
-  HookState<PageController, Hook<PageController>> createState(
-          keys, beforeState) =>
+  HookState<PageController, Hook<PageController>> createState(beforeState) =>
       _PageControllerHookState();
 }
 
@@ -60,7 +59,7 @@ class _PageControllerHookState
   PageController build(BuildContext context) => controller;
 
   @override
-  void dispose(last) => controller.dispose();
+  void dispose(last, newerState) => controller.dispose();
 
   @override
   String get debugLabel => 'usePageController';

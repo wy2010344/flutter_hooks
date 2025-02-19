@@ -13,7 +13,7 @@ import 'package:flutter/material.dart'
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 
-import 'framework.dart';
+import '../flutter_hooks.dart';
 
 part 'animation.dart';
 part 'async.dart';
@@ -28,7 +28,7 @@ part 'listenable_selector.dart';
 part 'misc.dart';
 part 'page_controller.dart';
 part 'platform_brightness.dart';
-part 'primitives.dart';
+part 'use_value_changed.dart';
 part 'scroll_controller.dart';
 part 'search_controller.dart';
 part 'tab_controller.dart';

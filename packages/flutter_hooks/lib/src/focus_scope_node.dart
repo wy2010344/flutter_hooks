@@ -34,7 +34,7 @@ class _FocusScopeNodeHook extends Hook<FocusScopeNode> {
   final bool canRequestFocus;
 
   @override
-  _FocusScopeNodeHookState createState(keys, beforeState) {
+  _FocusScopeNodeHookState createState(beforeState) {
     return _FocusScopeNodeHookState();
   }
 }
@@ -61,7 +61,7 @@ class _FocusScopeNodeHookState
   FocusScopeNode build(BuildContext context) => _focusScopeNode;
 
   @override
-  void dispose(last) => _focusScopeNode.dispose();
+  void dispose(last, newerState) => _focusScopeNode.dispose();
 
   @override
   String get debugLabel => 'useFocusScopeNode';

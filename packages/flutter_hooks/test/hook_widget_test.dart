@@ -1,13 +1,14 @@
 // ignore_for_file: invalid_use_of_protected_member, only_throw_errors
 import 'package:flutter/widgets.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:flutter_hooks/src/core/use_effect.dart';
+import 'package:flutter_hooks/src/core/use_state.dart';
 
 import 'mock.dart';
 
 class InheritedInitHook extends Hook<void> {
   @override
-  InheritedInitHookState createState(keys, beforeState) =>
-      InheritedInitHookState();
+  InheritedInitHookState createState(beforeState) => InheritedInitHookState();
 }
 
 class InheritedInitHookState extends HookState<void, InheritedInitHook> {
@@ -101,8 +102,8 @@ void main() {
 
     await tester.pumpWidget(
       HookBuilder(builder: (c) {
-        useEffect((e) => first);
-        useEffect((e) => second);
+        useAlawaysEffect((e) => first);
+        useAlawaysEffect((e) => second);
         return Container();
       }),
     );
@@ -1243,7 +1244,7 @@ void main() {
 
 class MayHaveChangedOnReassemble extends Hook<void> {
   @override
-  MayHaveChangedOnReassembleState createState(keys, beforeState) =>
+  MayHaveChangedOnReassembleState createState(beforeState) =>
       MayHaveChangedOnReassembleState();
 }
 
@@ -1265,7 +1266,7 @@ class MayHaveChangedOnReassembleState
 
 class MyHook extends Hook<MyHookState> {
   @override
-  MyHookState createState(keys, beforeState) => MyHookState();
+  MyHookState createState(beforeState) => MyHookState();
 }
 
 class MyHookState extends HookState<MyHookState, MyHook> {

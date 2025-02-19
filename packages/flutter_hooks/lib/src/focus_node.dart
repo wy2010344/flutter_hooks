@@ -38,7 +38,7 @@ class _FocusNodeHook extends Hook<FocusNode> {
   final bool descendantsAreFocusable;
 
   @override
-  _FocusNodeHookState createState(keys, beforeState) {
+  _FocusNodeHookState createState(beforeState) {
     return _FocusNodeHookState();
   }
 }
@@ -66,7 +66,7 @@ class _FocusNodeHookState extends HookState<FocusNode, _FocusNodeHook> {
   FocusNode build(BuildContext context) => _focusNode;
 
   @override
-  void dispose(last) => _focusNode.dispose();
+  void dispose(last, newerState) => _focusNode.dispose();
 
   @override
   String get debugLabel => 'useFocusNode';

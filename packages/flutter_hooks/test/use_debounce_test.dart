@@ -1,6 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:flutter_hooks/src/core/use_effect.dart';
+import 'package:flutter_hooks/src/core/use_state.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {

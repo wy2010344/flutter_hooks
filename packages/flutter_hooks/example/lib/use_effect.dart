@@ -3,6 +3,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:flutter_hooks/src/core/use_effect.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// This example demonstrates how to create a custom Hook.

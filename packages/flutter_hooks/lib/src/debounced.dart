@@ -40,8 +40,7 @@ class _DebouncedHook<T> extends Hook<T?> {
   final Duration timeout;
 
   @override
-  _DebouncedHookState<T> createState(keys, beforeState) =>
-      _DebouncedHookState();
+  _DebouncedHookState<T> createState(beforeState) => _DebouncedHookState();
 }
 
 class _DebouncedHookState<T> extends HookState<T?, _DebouncedHook<T>> {
@@ -81,9 +80,9 @@ class _DebouncedHookState<T> extends HookState<T?, _DebouncedHook<T>> {
   String get debugLabel => 'useDebounced<$T>';
 
   @override
-  void dispose(last) {
+  void dispose(last, newerState) {
     _timer?.cancel();
     _timer = null;
-    super.dispose(last);
+    super.dispose(last, newerState);
   }
 }

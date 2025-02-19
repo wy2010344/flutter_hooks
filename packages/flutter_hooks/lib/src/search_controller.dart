@@ -8,12 +8,12 @@ SearchController useSearchController({List<Object?>? keys}) {
   return use(_SearchControllerHook(keys: keys));
 }
 
-class _SearchControllerHook extends Hook<SearchController> {
-  const _SearchControllerHook({List<Object?>? keys}) : super(keys: keys);
+class _SearchControllerHook extends ListHook<SearchController> {
+  const _SearchControllerHook({List<Object?>? keys}) : super(keys);
 
   @override
   HookState<SearchController, Hook<SearchController>> createState(
-          keys, beforeState) =>
+          beforeState) =>
       _SearchControllerHookState();
 }
 
@@ -28,5 +28,5 @@ class _SearchControllerHookState
   SearchController build(BuildContext context) => controller;
 
   @override
-  void dispose(last) => controller.dispose();
+  void dispose(last, newerState) => controller.dispose();
 }

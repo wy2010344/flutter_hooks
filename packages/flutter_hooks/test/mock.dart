@@ -2,6 +2,7 @@
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:flutter_hooks/src/core/use_effect.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 
@@ -18,7 +19,7 @@ export 'package:flutter_test/flutter_test.dart'
         Fake;
 export 'package:mockito/mockito.dart';
 
-class HookTest<R> extends Hook<R?> {
+class HookTest<R> extends ListHook<R?> {
   // ignore: prefer_const_constructors_in_immutables
   HookTest({
     this.build,
@@ -30,7 +31,7 @@ class HookTest<R> extends Hook<R?> {
     this.didBuild,
     this.deactivate,
     List<Object?>? keys,
-  }) : super(keys: keys);
+  }) : super(keys);
 
   final R Function(BuildContext context)? build;
   final void Function(EffectDisposeEvent e)? dispose;
@@ -42,7 +43,7 @@ class HookTest<R> extends Hook<R?> {
   final HookStateTest<R> Function()? createStateFn;
 
   @override
-  HookStateTest<R> createState(keys, beforeState) =>
+  HookStateTest<R> createState(beforeState) =>
       createStateFn != null ? createStateFn!() : HookStateTest<R>();
 }
 
@@ -54,7 +55,7 @@ class _FakeEffectDepose with EffectDisposeEvent {
 
 final fakeEffectDeposeEvent = _FakeEffectDepose(false, []);
 
-class _FakeEffectEvent with EffectEvent {
+class _FakeEffectEvent with EffectEvent<List<Object?>?> {
   List<Object?>? trigger;
   //是否是第一次执行
   bool isInit = false;
@@ -72,7 +73,7 @@ class HookStateTest<R> extends HookState<R?, HookTest<R>> {
   }
 
   @override
-  void dispose(last) {
+  void dispose(last, beforeState) {
     hook.dispose?.call(fakeEffectDeposeEvent);
   }
 

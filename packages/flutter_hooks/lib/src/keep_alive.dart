@@ -21,7 +21,6 @@ class _AutomaticKeepAliveHook extends Hook<void> {
 
   @override
   HookState<void, _AutomaticKeepAliveHook> createState(
-    keys,
     beforeState,
   ) =>
       _AutomaticKeepAliveHookState();

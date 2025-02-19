@@ -26,7 +26,7 @@ class _AppLifecycleHook extends Hook<AppLifecycleState?> {
   final LifecycleCallback? onStateChanged;
 
   @override
-  __AppLifecycleStateState createState(keys, beforeState) =>
+  __AppLifecycleStateState createState(beforeState) =>
       __AppLifecycleStateState();
 }
 
@@ -48,8 +48,8 @@ class __AppLifecycleStateState
   AppLifecycleState? build(BuildContext context) => _state;
 
   @override
-  void dispose(last) {
-    super.dispose(last);
+  void dispose(last, newerState) {
+    super.dispose(last, newerState);
     WidgetsBinding.instance.removeObserver(this);
   }
 
