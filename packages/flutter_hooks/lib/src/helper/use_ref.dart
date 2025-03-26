@@ -36,3 +36,7 @@ ObjectRef<T> useRef<T>(T initialValue) {
 ObjectRef<T> useRefCreateOne<T, V>(OneCreater<V, T> creater, V init) {
   return useMemo((e) => ObjectRef<T>(creater(init)), emptyList);
 }
+
+ObjectRef<T> useRefCreate<T>(T Function() creater) {
+  return useMemo((e) => ObjectRef<T>(creater()), emptyList);
+}

@@ -1,3 +1,4 @@
+export 'package:flutter_hooks/src/core/signal.dart';
 export 'package:flutter_hooks/src/core/use_effect.dart';
 export 'package:flutter_hooks/src/core/use_memo.dart';
 export 'package:flutter_hooks/src/core/use_state.dart';

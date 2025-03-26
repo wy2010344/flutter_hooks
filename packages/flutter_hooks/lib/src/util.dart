@@ -12,6 +12,8 @@ T quote<T>(T v) {
   return v;
 }
 
+typedef GetValue<T> = T Function();
+typedef SetValue<T> = void Function(T);
 typedef Compare<T> = bool Function(T, T);
 typedef MCompare<V> = bool Function(V, dynamic);
 
@@ -51,6 +53,12 @@ bool simpleEqual(dynamic a, dynamic b) {
   return a == b;
 }
 
+bool simpleNotEqual(dynamic a, dynamic b) {
+  return a != b;
+}
+
+void emptySet(dynamic a) {}
+
 /// 要么 a与b简单相等
 /// 要么 a的列表与b列表相等
 bool listOrOneEqual(dynamic a, dynamic b) {
@@ -61,6 +69,16 @@ bool listOrOneEqual(dynamic a, dynamic b) {
     return listDeppEqual(a, b);
   }
   return false;
+}
+
+void run(Function fun) {
+  fun();
+}
+
+extension ObjectExtension on Object {
+  List<T> asList<T>() {
+    return [this as T];
+  }
 }
 
 bool listDeppEqual(List<Object?> p1, List<Object?> p2) {
