@@ -1,7 +1,5 @@
 import 'dart:collection';
 
-import 'package:flutter/rendering.dart';
-
 import '../../flutter_hooks.dart';
 
 class _CurrentBatch {
@@ -16,7 +14,6 @@ _CurrentBatch? _currentBatch;
 SplayTreeMap<double, List<Function>>? _currentEffects;
 List<_CurrentBatch> _recycleBatches = [];
 Map<Function, dynamic>? _currentRelay;
-var _realTimeCall = false;
 
 void memoKeep(Function fun) {
   final oldCurrent = _currentFun;
@@ -168,38 +165,35 @@ void _commitSignal(_Signal<dynamic> signal) {
 // ignore: public_member_api_docs
 void batchSignalEnd() {
   if (_currentEffects != null) {
-    _realTimeCall = true;
+    print("执行effect中不能batchSignalEnd");
     return;
   }
   if (_currentEffects != null) {
-    _realTimeCall = true;
+    print("执行listener中中不能batchSignalEnd");
     return;
   }
-  if (_currentBatch != null) {
-    final currentBatch = _currentBatch!;
-    _realTimeCall = false;
-    currentBatch.signals.forEach(_commitSignal);
-    currentBatch.signals.clear();
+  while (true) {
+    if (_currentBatch != null) {
+      final currentBatch = _currentBatch!;
+      currentBatch.signals.forEach(_commitSignal);
+      currentBatch.signals.clear();
 
-    _currentBatch = null;
-    _currentEffects = currentBatch.effects;
+      _currentBatch = null;
+      _currentEffects = currentBatch.effects;
 
-    final listeners = currentBatch.listeners;
-    listeners.forEach(run);
-    listeners.clear();
-    _currentEffects = null;
+      final listeners = currentBatch.listeners;
+      listeners.forEach(run);
+      listeners.clear();
+      _currentEffects = null;
 
-    final effects = currentBatch.effects;
-    effects.forEach(_runEffect);
-    effects.clear();
+      final effects = currentBatch.effects;
+      effects.forEach(_runEffect);
+      effects.clear();
+      _recycleBatches.add(currentBatch);
 
-    _recycleBatches.add(currentBatch);
-
-    if (_realTimeCall) {
-      batchSignalEnd();
-    }
-    if (_recycleBatches.length > 2) {
-      print('出现了${_recycleBatches.length}个recycleBatches');
+      if (_recycleBatches.length > 2) {
+        print('出现了${_recycleBatches.length}个recycleBatches');
+      }
     }
   }
 }
@@ -334,4 +328,12 @@ class _Memo<T> extends Memo<T> with SignalMemoEvent<T> {
 // ignore: public_member_api_docs
 Memo<T> memo<T>(SignalMemoReducer<T> get, [SetValue<T> after = emptySet]) {
   return _Memo(get, after);
+}
+
+GetValue<T> memoFun<T>(SignalMemoReducer<GetValue<T>> get,
+    [SetValue<GetValue<T>> after = emptySet]) {
+  final value = memo<GetValue<T>>(get, after);
+  return () {
+    return value.value();
+  };
 }
