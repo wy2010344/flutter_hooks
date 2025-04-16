@@ -60,7 +60,7 @@ class __AppLifecycleStateState
     hook.onStateChanged?.call(previous, state);
 
     if (hook.rebuildOnChange) {
-      setState(() {});
+      setState(emptyFun);
     }
   }
 }

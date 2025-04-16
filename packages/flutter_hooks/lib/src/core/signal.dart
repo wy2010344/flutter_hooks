@@ -1,6 +1,9 @@
 import 'dart:collection';
 
+import 'package:flutter/widgets.dart';
+
 import '../../flutter_hooks.dart';
+import '../helper/use_update.dart';
 
 class _CurrentBatch {
   _CurrentBatch(this.signals, this.listeners, this.effects);
@@ -194,6 +197,8 @@ void batchSignalEnd() {
       if (_recycleBatches.length > 2) {
         print('出现了${_recycleBatches.length}个recycleBatches');
       }
+    } else {
+      break;
     }
   }
 }
@@ -237,6 +242,21 @@ class _TrackSignal<T> implements SignalMemoEvent<T> {
 
   void dispose() {
     _disabled = true;
+  }
+}
+
+// 在render期间,将更新注入信号
+// 信号变更,只是将SignalHookBuilder变脏
+class SignalHookBuilder extends HookBuilder {
+  SignalHookBuilder({required super.builder, super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final update = useUpdate();
+    _currentFun = update;
+    final widget = builder(context);
+    _currentFun = null;
+    return widget;
   }
 }
 

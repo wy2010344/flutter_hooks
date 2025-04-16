@@ -73,7 +73,7 @@ class _StateHookState<T> extends HookState<ValueNotifier<T>, AbsStateHook<T>> {
   ValueNotifier<T> build(BuildContext context) => _state;
 
   void _listener() {
-    setState(() {});
+    setState(emptyFun);
   }
 
   @override

@@ -64,7 +64,7 @@ class _PlatformBrightnessState
     hook.onBrightnessChange?.call(_previous, _brightness);
 
     if (hook.rebuildOnChange) {
-      setState(() {});
+      setState(emptyFun);
     }
   }
 }

@@ -68,7 +68,7 @@ class _ListenableStateHook extends HookState<void, _ListenableHook> {
   void build(BuildContext context) {}
 
   void _listener() {
-    setState(() {});
+    setState(emptyFun);
   }
 
   @override
