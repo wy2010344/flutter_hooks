@@ -5,38 +5,32 @@ import 'package:flutter/widgets.dart';
 import '../../flutter_hooks.dart';
 import '../helper/use_update.dart';
 
-class _CurrentBatch {
-  _CurrentBatch(this.signals, this.listeners, this.effects);
-  Set<_Signal<dynamic>> signals;
-  Set<Function> listeners;
-  SplayTreeMap<double, List<Function>> effects;
+final class _CurrentBatch {
+  final List<_TrackSignal> deps = [];
+  final Set<_TrackSignalBase> listeners = {};
+  final SplayTreeMap<double, List<Function>> effects = SplayTreeMap();
 }
 
-Function? _currentFun;
-_CurrentBatch? _currentBatch;
-SplayTreeMap<double, List<Function>>? _currentEffects;
-List<_CurrentBatch> _recycleBatches = [];
-Map<Function, dynamic>? _currentRelay;
+final class UID {}
 
-void memoKeep(Function fun) {
-  final oldCurrent = _currentFun;
-  final oldCurrentRelay = _currentRelay;
-  _currentFun = null;
-  _currentRelay = null;
-  fun();
-  _currentFun = oldCurrent;
-  _currentRelay = oldCurrentRelay;
-}
+var _beginBatch = false;
+var _onEffectRun = false;
+var _callGet = false;
+_TrackSignalBase? _currentFun;
+var _currentBatch = _CurrentBatch();
+var _nextBatch = _CurrentBatch();
+UID _state = UID();
+_CurrentBatch? _onWorkBatch;
+Map<GetSignal<dynamic>, dynamic>? _currentRelay;
 
 void addEffect(Function effect, {double level = 0}) {
   late Map<double, List<Function>> effects;
-  if (_currentEffects != null) {
-    effects = _currentEffects!;
+  if (_onWorkBatch != null) {
+    effects = _onWorkBatch!.effects;
   } else {
     _beginCurrentBatch();
-    effects = _currentBatch!.effects;
+    effects = _currentBatch.effects;
   }
-
   var olds = effects[level];
   if (olds == null) {
     olds = [];
@@ -45,15 +39,14 @@ void addEffect(Function effect, {double level = 0}) {
   olds.add(effect);
 }
 
-void _addRelay(Function get, dynamic value) {
+void _addRelay(GetSignal<dynamic> get, dynamic value) {
   _currentRelay?[get] = value;
 }
 
-void _addListener(Function listener) {
-  _currentBatch!.listeners.add(listener);
+mixin GetSignal<T> {
+  T get value;
 }
-
-mixin Signal<T> {
+mixin Signal<T> implements GetSignal<T> {
   T get();
   void set(T v);
 
@@ -61,21 +54,9 @@ mixin Signal<T> {
 }
 
 class _Signal<T> with Signal<T> {
-  _Signal(this._value, this._shouldChange) {
-    this._dirtyValue = _value;
-  }
-  bool _dirty = false;
-  late T _dirtyValue;
+  _Signal(this._value, this._shouldChange) {}
   T _value;
   final Compare<dynamic> _shouldChange;
-  final List<Set<Function>> _listeners = [{}, {}];
-
-  T getValue() {
-    if (_dirty) {
-      return _dirtyValue;
-    }
-    return _value;
-  }
 
   @override
   T get value {
@@ -89,52 +70,27 @@ class _Signal<T> with Signal<T> {
 
   @override
   void set(T v) {
-    if (_currentFun != null) {
+    if (_onWorkBatch != null) {
       throw Exception('计算期间不允许修改值');
     }
-    if (_currentEffects != null) {
-      throw Exception('计算期间不允许修改值1');
-    }
-    if (_dirty) {
-      _dirtyValue = v;
-    } else {
-      if (_listeners[0].isEmpty) {
-        this._value = v;
-      } else {
-        if (this._shouldChange(_value, v)) {
-          _dirty = true;
-          _dirtyValue = v;
-          _beginCurrentBatch();
-          _currentBatch!.signals.add(this);
-        }
+    if (_shouldChange(v, _value)) {
+      if (_callGet) {
+        _callGet = false;
+        _state = UID();
       }
-    }
-  }
-
-  bool acceptChange(T v) {
-    if (this._dirty) {
-      return true;
-    }
-    return _shouldChange(_value, v);
-  }
-
-  void commit() {
-    _dirty = false;
-    if (_shouldChange(_dirtyValue, _value)) {
-      _value = _dirtyValue;
-      final oldListener = _listeners.removeAt(0);
-      oldListener.forEach(_addListener);
-      oldListener.clear();
-      _listeners.add(oldListener);
+      _value = v;
+      if (_currentBatch.listeners.isNotEmpty) {
+        _beginCurrentBatch();
+      }
     }
   }
 
   @override
   T get() {
-    final value = this.getValue();
-    _addRelay(get, value);
+    final value = this._value;
+    _addRelay(this, value);
     if (_currentFun != null) {
-      _listeners[0].add(_currentFun!);
+      _currentBatch.listeners.add(_currentFun!);
     }
     return value;
   }
@@ -147,101 +103,116 @@ Signal<T> createSignal<T>(T value,
 }
 
 bool signalOnUpdate() {
-  return _currentEffects != null;
+  return _onWorkBatch != null;
 }
 
 void _beginCurrentBatch() {
-  if (_currentBatch == null) {
-    if (_recycleBatches.isEmpty) {
-      _currentBatch = _CurrentBatch({}, {}, SplayTreeMap());
-    } else {
-      _currentBatch = _recycleBatches.removeAt(0);
-    }
-    Future.microtask(batchSignalEnd);
+  if (_beginBatch) {
+    return;
   }
-}
-
-void _commitSignal(_Signal<dynamic> signal) {
-  signal.commit();
+  _beginBatch = true;
+  Future.microtask(batchSignalEnd);
 }
 
 // ignore: public_member_api_docs
 void batchSignalEnd() {
-  if (_currentEffects != null) {
+  if (_onEffectRun) {
     print("执行effect中不能batchSignalEnd");
     return;
   }
-  if (_currentEffects != null) {
+  if (_onWorkBatch != null) {
     print("执行listener中中不能batchSignalEnd");
     return;
   }
-  while (true) {
-    if (_currentBatch != null) {
-      final currentBatch = _currentBatch!;
-      currentBatch.signals.forEach(_commitSignal);
-      currentBatch.signals.clear();
+  while (_beginBatch) {
+    _beginBatch = false;
+    final currentBatch = _currentBatch;
+    _currentBatch = _nextBatch;
+    _nextBatch = currentBatch;
 
-      _currentBatch = null;
-      _currentEffects = currentBatch.effects;
+    final deps = currentBatch.deps;
+    final effects = currentBatch.effects;
+    _onWorkBatch = currentBatch;
 
-      final listeners = currentBatch.listeners;
-      listeners.forEach(run);
-      listeners.clear();
-      _currentEffects = null;
+    currentBatch.listeners.forEach(_listenerRun);
+    currentBatch.listeners.clear();
 
-      final effects = currentBatch.effects;
-      effects.forEach(_runEffect);
-      effects.clear();
-      _recycleBatches.add(currentBatch);
-
-      if (_recycleBatches.length > 2) {
-        print('出现了${_recycleBatches.length}个recycleBatches');
-      }
-    } else {
-      break;
+    while (deps.isNotEmpty) {
+      deps.removeAt(0).addFun();
     }
+    _onWorkBatch = null;
+
+    _onEffectRun = true;
+    effects.forEach(_runEffect);
+    effects.clear();
+    _onEffectRun = false;
   }
+}
+
+void _listenerRun(_TrackSignalBase track) {
+  track.addFun();
 }
 
 void _runEffect(double level, List<Function> effects) {
   effects.forEach(run);
 }
 
-class _TrackSignal<T> implements SignalMemoEvent<T> {
-  T Function(SignalMemoEvent<T> e) _get;
-  void Function(T) _set;
-  _TrackSignal(this._get, this._set) {}
+mixin _TrackSignalBase {
+  void addFun();
+}
+
+mixin TrackSignalArg<T> {
+  T get(GetSignal<T>? e);
+  void set(T v, GetSignal<T>? e);
+}
+
+class _TrackSignal<T> implements GetSignal<T>, _TrackSignalBase {
+  final TrackSignalArg<T> arg;
+  _TrackSignal(this.arg) {}
   var _disabled = false;
   var _inited = false;
   late T _lastValue;
-  @override
-  bool get inited => _inited;
 
   @override
-  T get lastValue => _lastValue;
+  T get value => _lastValue;
 
   addFun() {
     if (_disabled) {
       return;
     }
-
-    _currentFun = addFun;
-    final value = this._get(this);
+    _currentFun = this;
+    final value = this.arg.get(_inited ? this : null);
     _currentFun = null;
-    if (inited) {
-      if (value != lastValue) {
+    if (_inited) {
+      if (value != _lastValue) {
         _lastValue = value;
-        this._set(value);
+        this.arg.set(value, this);
       }
     } else {
       _inited = true;
       _lastValue = value;
-      this._set(value);
+      this.arg.set(value, null);
     }
+  }
+
+  T collect<T>(T Function() fun) {
+    _currentFun = this;
+    final o = fun();
+    _currentFun = null;
+    return o;
   }
 
   void dispose() {
     _disabled = true;
+  }
+}
+
+class _TrackSignalBaseFun with _TrackSignalBase {
+  var fun;
+  _TrackSignalBaseFun(this.fun) {}
+  @override
+  void addFun() {
+    this.fun();
   }
 }
 
@@ -252,7 +223,7 @@ class SignalHookBuilder extends HookBuilder {
 
   @override
   Widget build(BuildContext context) {
-    final update = useUpdate();
+    final update = useUpdateT(_TrackSignalBaseFun.new);
     _currentFun = update;
     final widget = builder(context);
     _currentFun = null;
@@ -261,70 +232,82 @@ class SignalHookBuilder extends HookBuilder {
 }
 
 // ignore: public_member_api_docs
-void Function() trackSignal<T>(
-    T Function(SignalMemoEvent<T> e) get, void Function(T) set) {
-  final trackSignal = _TrackSignal(get, set);
-  trackSignal.addFun();
+void Function() trackSignal<T>(TrackSignalArg<T> arg) {
+  final trackSignal = _TrackSignal(arg);
+  final deps = _onWorkBatch?.deps;
+  if (deps != null) {
+    deps.add(trackSignal);
+  } else {
+    batchSignalEnd();
+    _currentBatch.deps.add(trackSignal);
+  }
   return trackSignal.dispose;
 }
 
-bool _relayChange(Map<GetValue<dynamic>, dynamic> relays) {
-  for (final get in relays.keys) {
-    final old = relays[get];
-    if (get() != old) {
-      return true;
-    }
-  }
-  return false;
-}
-
-typedef SignalMemoReducer<T> = T Function(SignalMemoEvent<T>);
-
-T _memoGet<T>(Map<GetValue<dynamic>, dynamic> relays, SignalMemoReducer<T> get,
-    SignalMemoEvent<T> e) {
-  relays.clear();
-  _currentRelay = relays;
-  final v = get(e);
-  return v;
-}
+typedef SignalMemoReducer<T> = T Function(GetSignal<T>?);
 
 // ignore: public_member_api_docs
-mixin SignalMemoEvent<T> {
-  bool get inited;
-  T get lastValue;
+
+void _mapInject(GetSignal<dynamic> get, dynamic v) {
+  get.value;
 }
 
-abstract class Memo<T> {
-  T get value;
-}
-
-class _Memo<T> extends Memo<T> with SignalMemoEvent<T> {
+class _Memo<T> with GetSignal<T> {
   _Memo(this._get, this._after);
-  T _getValue() {
-    var shouldAfter = false;
 
+  UID? _stateVersion;
+  _TrackSignalBase? _listener;
+
+  T _memoGet() {
+    _relays.clear();
+    _currentRelay = _relays;
+    return _get((_inited ? this : null) as GetSignal<T>?);
+  }
+
+  bool _relayChange() {
+    for (final get in _relays.keys) {
+      final old = _relays[get];
+      if (get.value != old) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  T _getValue() {
+    _callGet = true;
+    if (_stateVersion == _state) {
+      if (_onWorkBatch != null && _listener != _currentFun) {
+        _listener = _currentFun;
+        _relays.forEach(_mapInject);
+      }
+      _addRelay(this, _value);
+      return _value;
+    }
+
+    var shouldAfter = false;
     final lastRelay = _currentRelay;
     _currentRelay = null;
     if (_inited) {
-      if (_relayChange(_relays)) {
-        final value = _memoGet(_relays, _get, this);
+      if (_relayChange()) {
+        final value = _memoGet();
         if (value != _value) {
           _value = value;
           shouldAfter = true;
         }
       }
     } else {
-      _value = _memoGet(_relays, _get, this);
+      _value = _memoGet();
       _inited = true;
       shouldAfter = true;
     }
     _currentRelay = lastRelay;
 
-    _addRelay(_getValue, value);
-    if (shouldAfter) {
-      _after(value);
+    _addRelay(this, _value);
+    if (shouldAfter && _after != null) {
+      _after!(_value);
     }
-    return value;
+    return _value;
   }
 
   late T _value;
@@ -334,19 +317,13 @@ class _Memo<T> extends Memo<T> with SignalMemoEvent<T> {
     return _getValue();
   }
 
-  Map<GetValue<dynamic>, dynamic> _relays = {};
-  SignalMemoReducer<T> _get;
-  SetValue<T> _after;
-
-  @override
-  T get lastValue => _value;
-
-  @override
-  bool get inited => _inited;
+  final Map<GetSignal<dynamic>, dynamic> _relays = {};
+  final SignalMemoReducer<T> _get;
+  final SetValue<T>? _after;
 }
 
 // ignore: public_member_api_docs
-Memo<T> memo<T>(SignalMemoReducer<T> get, [SetValue<T> after = emptySet]) {
+GetSignal<T> memo<T>(SignalMemoReducer<T> get, [SetValue<T>? after = null]) {
   return _Memo(get, after);
 }
 
@@ -356,4 +333,44 @@ GetValue<T> memoFun<T>(SignalMemoReducer<GetValue<T>> get,
   return () {
     return value.value();
   };
+}
+
+class _UpdateSignal with TrackSignalArg {
+  VoidCallback callback;
+  _UpdateSignal(this.callback) {}
+
+  @override
+  get(GetSignal? e) {}
+  @override
+  void set(v, GetSignal? e) {}
+}
+
+T useTrackSignal<T>(GetValue<T> callback) {
+  final value = use(_TrackSignalHook());
+  return value.collect<T>(callback);
+}
+
+class _TrackSignalHook extends Hook<_TrackSignal> {
+  @override
+  HookState<_TrackSignal, Hook<_TrackSignal>> createState(
+      HookState<_TrackSignal, Hook<_TrackSignal>>? beforeState) {
+    return _TrackSignalState();
+  }
+}
+
+class _TrackSignalState extends HookState<_TrackSignal, _TrackSignalHook> {
+  late _TrackSignal t;
+  @override
+  _TrackSignal build(BuildContext context) {
+    t = _TrackSignal(_UpdateSignal(() {
+      setState(emptyFun);
+    }));
+    return t;
+  }
+
+  @override
+  void dispose(bool last,
+      covariant HookState<_TrackSignal, _TrackSignalHook>? beforeState) {
+    t.dispose();
+  }
 }

@@ -3,19 +3,27 @@ import 'package:flutter/src/widgets/framework.dart';
 
 import '../../flutter_hooks.dart';
 
-VoidCallback useUpdate() {
-  return use(_UpdateHook());
+typedef BD<T> = T Function(VoidCallback fun);
+T useUpdateT<T>(BD<T> toT) {
+  return use(_UpdateHook<T>(toT));
 }
 
-class _UpdateHook extends Hook<VoidCallback> {
+VoidCallback useUpdateFun() {
+  return useUpdateT(quote);
+}
+
+class _UpdateHook<T> extends Hook<T> {
+  BD<T> _build;
+  _UpdateHook(this._build) {}
   @override
-  HookState<VoidCallback, Hook<VoidCallback>> createState(
-      HookState<VoidCallback, Hook<VoidCallback>>? beforeState) {
-    return _UpdateHookState();
+  HookState<T, Hook<T>> createState(HookState<T, Hook<T>>? beforeState) {
+    return _UpdateHookState<T>(_build);
   }
 }
 
-class _UpdateHookState extends HookState<VoidCallback, _UpdateHook> {
+class _UpdateHookState<T> extends HookState<T, _UpdateHook<T>> {
+  BD<T> _build;
+  _UpdateHookState(this._build) {}
   bool _disposed = false;
   void _callback() {
     if (_disposed) {
@@ -25,13 +33,12 @@ class _UpdateHookState extends HookState<VoidCallback, _UpdateHook> {
   }
 
   @override
-  VoidCallback build(BuildContext context) {
-    return _callback;
+  T build(BuildContext context) {
+    return _build(_callback);
   }
 
   @override
-  void dispose(
-      bool last, covariant HookState<VoidCallback, _UpdateHook>? beforeState) {
+  void dispose(bool last, covariant HookState<T, _UpdateHook<T>>? beforeState) {
     _disposed = true;
   }
 }
