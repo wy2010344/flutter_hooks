@@ -54,9 +54,8 @@ mixin Signal<T> implements GetSignal<T> {
 }
 
 class _Signal<T> with Signal<T> {
-  _Signal(this._value, this._shouldChange) {}
+  _Signal(this._value) {}
   T _value;
-  final Compare<dynamic> _shouldChange;
 
   @override
   T get value {
@@ -73,7 +72,7 @@ class _Signal<T> with Signal<T> {
     if (_onWorkBatch != null) {
       throw Exception('计算期间不允许修改值');
     }
-    if (_shouldChange(v, _value)) {
+    if (v != _value) {
       if (_callGet) {
         _callGet = false;
         _state = UID();
@@ -97,9 +96,8 @@ class _Signal<T> with Signal<T> {
 }
 
 // ignore: public_member_api_docs
-Signal<T> createSignal<T>(T value,
-    {Compare<dynamic> shouldChange = simpleNotEqual}) {
-  return _Signal(value, shouldChange);
+Signal<T> createSignal<T>(T value) {
+  return _Signal(value);
 }
 
 bool signalOnUpdate() {
@@ -373,4 +371,8 @@ class _TrackSignalState extends HookState<_TrackSignal, _TrackSignalHook> {
       covariant HookState<_TrackSignal, _TrackSignalHook>? beforeState) {
     t.dispose();
   }
+}
+
+Signal<T> useSignal<T>(T value) {
+  return useMemo((e) => createSignal(value), 1);
 }
