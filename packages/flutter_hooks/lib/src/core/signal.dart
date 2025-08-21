@@ -79,20 +79,28 @@ class _Signal<T> with Signal<T> {
       }
       _value = v;
       if (_currentBatch.listeners.isNotEmpty) {
+        _listeners.forEach(_addListener);
+        _listeners.clear();
         _beginCurrentBatch();
       }
     }
   }
+
+  final List<_TrackSignalBase> _listeners = [];
 
   @override
   T get() {
     final value = this._value;
     _addRelay(this, value);
     if (_currentFun != null) {
-      _currentBatch.listeners.add(_currentFun!);
+      _listeners.add(_currentFun!);
     }
     return value;
   }
+}
+
+void _addListener(_TrackSignalBase listener) {
+  _currentBatch.listeners.add(listener);
 }
 
 // ignore: public_member_api_docs
@@ -282,6 +290,8 @@ class _Memo<T> with GetSignal<T> {
       _addRelay(this, _value);
       return _value;
     }
+    _listener = null;
+    _stateVersion = _state;
 
     var shouldAfter = false;
     final lastRelay = _currentRelay;
